@@ -35,6 +35,7 @@ export const MAIN_NAV: NavItem[] = [
       { href: "/info/noticias", label: "Noticias" },
       { href: "/info/peliculas", label: "Pelis" },
       { href: "/info/munchies", label: "Munchies" },
+      { href: "/info/juegos", label: "Juegos" },
     ],
   },
   {

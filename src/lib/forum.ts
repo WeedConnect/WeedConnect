@@ -115,3 +115,85 @@ export async function getThreadPosts(threadId: string): Promise<ForumPost[]> {
     .order("created_at");
   return (data as unknown as ForumPost[]) ?? [];
 }
+
+// --- Pure Business Logic Utilities ---
+
+export type SortableThread = {
+  pinned?: boolean;
+  category_position?: number;
+  votes?: number;
+  created_at: string;
+};
+
+/**
+ * Sorts threads based on multiple criteria:
+ * 1. Pinned threads first.
+ * 2. Category position weight (lower number = higher priority).
+ * 3. Votes count (higher votes = higher priority).
+ * 4. Date recency (newer threads = higher priority).
+ */
+export function sortThreads<T extends SortableThread>(threads: T[]): T[] {
+  return [...threads].sort((a, b) => {
+    // 1. Pinned
+    const aPinned = a.pinned ? 1 : 0;
+    const bPinned = b.pinned ? 1 : 0;
+    if (aPinned !== bPinned) return bPinned - aPinned;
+
+    // 2. Category position (lower is higher priority)
+    const aPos = a.category_position ?? 9999;
+    const bPos = b.category_position ?? 9999;
+    if (aPos !== bPos) return aPos - bPos;
+
+    // 3. Votes (higher votes first)
+    const aVotes = a.votes ?? 0;
+    const bVotes = b.votes ?? 0;
+    if (aVotes !== bVotes) return bVotes - aVotes;
+
+    // 4. Date Recency
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+}
+
+/**
+ * Maps responses (posts) correctly to their respective threads.
+ */
+export function mapPostsToThreads<T extends { id: string }, P extends { thread_id: string }>(
+  threads: T[],
+  posts: P[]
+): Array<T & { posts: P[] }> {
+  return threads.map((t) => ({
+    ...t,
+    posts: posts.filter((p) => p.thread_id === t.id),
+  }));
+}
+
+/**
+ * Maps threads to their corresponding categories.
+ */
+export function mapThreadsToCategories<C extends { id: string }, T extends { category_id: string }>(
+  categories: C[],
+  threads: T[]
+): Array<C & { threads: T[] }> {
+  return categories.map((c) => ({
+    ...c,
+    threads: threads.filter((t) => t.category_id === c.id),
+  }));
+}
+
+/**
+ * Filters threads accurately based on category ID and/or tags.
+ */
+export function filterThreads<T extends { category_id?: string; tags?: string[] }>(
+  threads: T[],
+  filters: { categoryId?: string; tag?: string }
+): T[] {
+  return threads.filter((t) => {
+    if (filters.categoryId && t.category_id !== filters.categoryId) {
+      return false;
+    }
+    if (filters.tag && (!t.tags || !t.tags.includes(filters.tag))) {
+      return false;
+    }
+    return true;
+  });
+}

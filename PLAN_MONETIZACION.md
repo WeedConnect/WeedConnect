@@ -72,15 +72,20 @@ Las llamadas a APIs de modelos avanzados (como Anthropic Claude o OpenAI GPT) ti
 Esta es la vía de monetización más rápida de implementar y con menores barreras de entrada legales, ya que se trata de comercio electrónico de productos 100% legales (semillas de colección, parafernalia, sustratos).
 
 ### 💡 Estrategia Transaccional
-1. **Comparador de Precios (Afiliación):**
+1. **Comparador de Precios y Compras Recomendadas (Afiliación)**:
    - La app lista vaporizadores, focos LED, armarios de cultivo y semillas de diferentes tiendas online.
+   - **NUEVO:** Secciones dedicadas a **"Setup Chill"** (Luces LED, altavoces bluetooth, proyectores económicos, ambientadores) y **"Juegos de Mesa Stoner"** (Jenga, UNO, juegos de cartas específicos).
    - Al hacer clic en "Ver oferta", se redirige con un enlace de afiliado (Amazon Associates, GrowBarato, Alchimia, bancos de semillas).
-   - **Comisión:** 5% - 15% de cada venta generada.
-   - **Justificación:** Cero costes de inventario o logística. Aportas valor ayudando al usuario a ahorrar dinero.
-2. **Venta Directa / Dropshipping de Merchandising:**
+   - **Comisión**: 5% - 15% de cada venta generada.
+   - **Justificación**: Cero costes de inventario o logística. Aportas valor ayudando al usuario a construir su ambiente ideal.
+2. **Munchies, Delivery y Food Sponsors**:
+   - Publicidad local de restaurantes cercanos al mapa de spots y clubes.
+   - Enlaces afiliados o cupones de descuento para apps de comida a domicilio (UberEats, JustEat, Glovo) integrados estratégicamente en los rankings de munchies y recetas express.
+3. **Venta Directa / Dropshipping de Merchandising**:
    - Gorras, camisetas, grinders personalizados y papel de fumar con la marca "WeedConnect".
    - Uso de Stripe Checkout (previsto para la Fase 4).
-   - **Justificación:** Genera marca y sentimiento de pertenencia en la comunidad.
+   - **Justificación**: Genera marca y sentimiento de pertenencia en la comunidad.
+
 
 ---
 

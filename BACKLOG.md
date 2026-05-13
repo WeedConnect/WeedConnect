@@ -4,29 +4,30 @@ Lista maestra de funcionalidades a implementar. Marcadas con `[x]` cuando estén
 
 ## Ideas core (de la lista inicial del usuario)
 
-- [~] **Foro de cannabis** — comunidad / threads / posts / votos.
-- [ ] **Recomendaciones de pelis** — listado curado, valoración usuarios.
-- [ ] **Recomendaciones de "gules" / munchies** — recetas + snacks.
+- [~] **Foro de cannabis** — comunidad / threads / posts / votos. Categorías extendidas (Experiencias, Munchies, Memes, Principiantes).
+- [~] **Recomendaciones de pelis** — listado curado y filtrado por "stoner mood" (Fumadón, Risas, Psicodélica, Clásico).
+- [~] **Recomendaciones de "gules" / munchies** — recetas + snacks + locales delivery cerca.
 - [ ] **Subida de fotos** — usar Supabase Storage.
 - [ ] **IA integrada en la app** — chat asistente sobre cultivo, strains, dudas legales (Claude/OpenAI vía route handler streaming).
-- [~] **Mapa de "llocs on pillar herba"** — clubes/asociaciones (PostGIS).
-- [ ] **Noticias** — feed de actualidad cannábica.
+- [~] **Mapa de spots chill y clubes** — asociaciones legales + miradores + parques + spots para relajarse (PostGIS + tags).
+- [ ] **Noticias** — feed de actualidad cannábica, mercado internacional y cultura.
 - [x] **Catálogo de strains** — indica/sativa/híbrido, THC/CBD, efectos.
-- [ ] **Temas legales** — sección informativa, alertas por país/CCAA.
-- [ ] **Información sobre el cannabis** — guías, educación.
-- [ ] **Merchandising** — tienda.
-- [ ] **Venta de productos** — checkout (Stripe).
+- [x] **Temas legales** — sección informativa en lenguaje sencillo, alertas por país/CCAA (sin asesoramiento).
+- [x] **Información sobre el cannabis** — guías, educación y tips de bienestar (bajar intensidad, convivencia).
+- [ ] **Merchandising** — tienda con Stripe.
+- [~] **Compras Recomendadas (Afiliación)** — catálogo de vaporizadores, grinders, setup chill y luces LED (Amazon Afiliados).
+- [ ] **Juegos para jugar fumado** — lista curada de juegos chill, caóticos y de mesa.
 
 ## Ideas extendidas (numeradas)
 
-1. [~] **Mapa interactivo de asociaciones y clubs** — Leaflet + OSM montado con mock data.
+1. [~] **Mapa interactivo de asociaciones y spots** — Leaflet + OSM montado con mock data y categorías.
 2. [ ] **Calendario de eventos y ferias** — vista calendar + listado.
-3. [ ] **Sección educativa** (artículos, vídeos, guías cultivador) — MDX o Sanity.
+3. [~] **Sección educativa** (artículos, vídeos, guías cultivador, reducción de daños) — MDX o Sanity.
 4. [ ] **Podcast / audio** — entrevistas embebidas (Spotify/iVoox).
-5. [ ] **Recetas cuina cannábica** — fotos + valoraciones comunidad.
+5. [~] **Recetas cuina cannábica** — fotos + valoraciones comunidad + warnings dosificación.
 6. [~] **Herramienta de seguimiento de cultivo** — riegos/fertilizantes/fases. Tipos `GrowLog` ya definidos.
 7. [ ] **Alertas personalizadas de noticias legales** — suscripción por región.
-8. [ ] **Comparador de productos y precios** — semillas, vaporizadores.
+8. [~] **Comparador de productos y precios / Afiliados** — semillas, vaporizadores, gears de setup.
 9. [ ] **Gamificación** — logros, puntos por participar. Campo `profiles.points` ya en schema.
 10. [ ] **Espacios privados / grupos temáticos** — cultivo interior, medicinal, recreativo. RLS en Supabase.
 11. [ ] **Blog colaborativo** — los usuarios envían historias/experiencias.
@@ -52,8 +53,9 @@ Lista maestra de funcionalidades a implementar. Marcadas con `[x]` cuando estén
 
 1. Conectar Supabase real (auth + foro + strains desde BBDD).
 2. Subida de fotos (avatar + posts foro + fotos grow log).
-3. Mapa con datos reales de clubes (importar de listados públicos o crowdsource).
+3. Mapa con datos reales de clubes y crowd-sourced spots.
 4. Grow tracker conectado.
 5. IA asistente (route handler streaming + Anthropic).
 6. Gamificación (triggers en BBDD para sumar puntos).
 7. Tienda (Stripe Checkout + pedidos).
+

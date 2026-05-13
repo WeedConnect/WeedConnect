@@ -28,10 +28,14 @@ export interface Strain {
   imageUrl?: string;
 }
 
+export type SpotCategory = "asociacion" | "mirador" | "parque" | "banco" | "playa" | "spot_relax" | "otro";
+
 export interface Club {
   id: ID;
   name: string;
   slug: string;
+  category: SpotCategory;
+  tags: string[];
   description?: string;
   address: string;
   city: string;

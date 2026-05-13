@@ -1,15 +1,57 @@
 import type { Metadata } from "next";
-import { BookOpen, Leaf, FlaskConical, Sprout, Droplets, Sun } from "lucide-react";
+import { BookOpen, Leaf, FlaskConical, Sprout, Droplets, Sun, Smile, HeartHandshake, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata: Metadata = {
-  title: "Educación cannábica",
+  title: "Educación y Bienestar cannábico",
   description:
-    "Guías sobre el sistema endocannabinoide, cannabinoides, terpenos, cultivo y reducción de daños.",
+    "Guías sobre ciencia cannábica, cultivo, reducción de daños y bienestar: bajar intensidad, consejos de convivencia y tips para principiantes.",
 };
 
 const GUIAS = [
+  {
+    icono: Sparkles,
+    titulo: "Tips para Principiantes: Inicio Seguro",
+    nivel: "Básico",
+    descripcion:
+      "Si estás explorando el cannabis por primera vez o tras mucho tiempo, la preparación mental y del espacio (Set & Setting) es clave. Empieza con suavidad para asegurar un viaje agradable.",
+    puntosClave: [
+      "La regla de oro: Empieza con dosis muy bajas y ve despacio. Siempre hay tiempo para más, pero nunca para menos.",
+      "Método de consumo: Inhalado es más instantáneo y fácil de controlar (efecto en 5-10 min). Con comestibles, espera mínimo 2 horas antes de consumir más.",
+      "Variedades equilibradas: Opta por strains con ratios 1:1 de THC y CBD. El CBD bloquea la sobreexcitación del receptor CB1.",
+      "Prepara tu 'Set & Setting': Rodéate de personas de máxima confianza en un lugar donde te sientas 100% seguro.",
+      "Ten hidratación y comida a mano antes de empezar.",
+    ],
+  },
+  {
+    icono: HeartHandshake,
+    titulo: "Qué hacer en un 'Amarillo' (Bajón o Ansiedad)",
+    nivel: "Básico",
+    descripcion:
+      "Un consumo excesivo o un mal contexto pueden provocar mareo, pánico o taquicardias. Mantén la calma: es una reacción física temporal, nunca letal y pasará pronto si sigues estos pasos.",
+    puntosClave: [
+      "Mantén la calma absoluta: Es físicamente imposible sufrir una sobredosis letal de fitocannabinoides. Lo que sientes pasará en un rato.",
+      "Busca aire y descanso: Ve a una zona ventilada, túmbate de lado si estás mareado y respira de forma pausada y profunda.",
+      "Azúcar e hidratación: Bebe agua fresca o zumo. Comer algo dulce o carbohidratos ayuda a estabilizar la tensión.",
+      "Pimienta negra o limón: Masticar un par de bolas de pimienta negra o morder limón ayuda gracias al terpeno Cariofileno, que mitiga la ansiedad del THC.",
+      "Pide ayuda a un colega: Si estás con alguien, coméntaselo con naturalidad para que te acompañe y te dé conversación tranquila.",
+    ],
+  },
+  {
+    icono: Smile,
+    titulo: "Manual de Buena Convivencia y Etiqueta",
+    nivel: "Básico",
+    descripcion:
+      "Disfrutar responsablemente implica también respetar el espacio de los demás. Un comportamiento cívico evita problemas vecinales y estigmas sociales.",
+    puntosClave: [
+      "Control del olor: El humo de cannabis viaja lejos. Utiliza filtros de carbono en cultivo interior o vaporizadores en casa para no molestar a los vecinos.",
+      "Espacios compartidos: Evita consumir en parques infantiles, zonas concurridas o cerca de colegios. El civismo es fundamental.",
+      "Respeto a los no consumidores: No todo el mundo disfruta del olor o la presencia del cannabis. Sé empático.",
+      "Recogida de residuos: Si consumes en un spot libre del mapa (playa, mirador), no dejes restos ni colillas. Cuida la naturaleza.",
+      "Leyes locales: Conoce la regulación de tu región para no exponerte a sanciones administrativas innecesarias.",
+    ],
+  },
   {
     icono: FlaskConical,
     titulo: "Cannabinoides: THC, CBD y más allá",

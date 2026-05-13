@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import ReactMarkdown from "react-markdown";
-import { Send, Bot, User, Loader2, AlertTriangle, Check } from "lucide-react";
+import { Send, User, Loader2, AlertTriangle, Check } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -59,13 +60,19 @@ export function AsistenteChat({ available }: { available: boolean }) {
     <div className="flex h-[calc(100vh-10rem)] flex-col rounded-xl border border-border bg-background shadow-sm">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-border px-4 py-3">
-        <div className="flex size-8 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
-          <Bot className="size-4 text-emerald-700 dark:text-emerald-300" />
+        <div className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-emerald-200 bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-900/40">
+          <Image
+            src="/images/bud/bud-base.png"
+            alt="Bud"
+            fill
+            sizes="36px"
+            className="object-cover"
+          />
         </div>
         <div>
-          <p className="text-sm font-semibold">Asistente WeedConnect</p>
+          <p className="text-sm font-semibold">Bud — Tu Asistente IA</p>
           <p className="text-xs text-muted-foreground">
-            {available ? "Listo para ayudarte" : "No disponible"}
+            {available ? "Listo para charlar, colega" : "No disponible"}
           </p>
         </div>
         <div
@@ -98,13 +105,18 @@ export function AsistenteChat({ available }: { available: boolean }) {
 
         {showWelcome && (
           <div className="flex flex-col items-center py-8 text-center">
-            <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40">
-              <Bot className="size-8 text-emerald-600" aria-hidden />
+            <div className="relative mb-4 flex size-20 items-center justify-center overflow-hidden rounded-full border-2 border-emerald-100 bg-emerald-100 shadow-sm dark:border-emerald-900 dark:bg-emerald-900/40">
+              <Image
+                src="/images/bud/bud-saludo.png"
+                alt="Bud saludando"
+                fill
+                sizes="80px"
+                className="object-cover"
+              />
             </div>
-            <h2 className="text-lg font-semibold">¡Hola! Soy el Asistente WeedConnect</h2>
+            <h2 className="text-lg font-semibold">¡Hola, colega! Soy Bud</h2>
             <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              Pregúntame sobre cultivo, strains, ciencia cannábica, legislación o reducción de
-              daños. Estoy aquí para informarte.
+              Tu aliado experto en cultivo, variedades, ciencia cannábica y derechos del consumidor. Pregúntame lo que necesites, ¡estoy para ayudarte!
             </p>
             <div className="mt-6 grid gap-2 sm:grid-cols-2">
               {SUGERENCIAS.map((s) => (
@@ -134,16 +146,22 @@ export function AsistenteChat({ available }: { available: boolean }) {
             >
               <div
                 className={cn(
-                  "flex size-7 shrink-0 items-center justify-center rounded-full",
+                  "relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full",
                   msg.role === "user"
                     ? "bg-emerald-600 text-white"
-                    : "bg-muted text-muted-foreground",
+                    : "bg-muted dark:bg-muted/50 border border-border/50",
                 )}
               >
                 {msg.role === "user" ? (
-                  <User className="size-3.5" />
+                  <User className="size-4" />
                 ) : (
-                  <Bot className="size-3.5" />
+                  <Image
+                    src="/images/bud/bud-base.png"
+                    alt="Bud"
+                    fill
+                    sizes="32px"
+                    className="object-cover"
+                  />
                 )}
               </div>
               <div
@@ -243,3 +261,4 @@ export function AsistenteChat({ available }: { available: boolean }) {
     </div>
   );
 }
+

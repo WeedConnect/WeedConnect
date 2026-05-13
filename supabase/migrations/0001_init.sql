@@ -42,6 +42,31 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
 
+-- Trigger: proteger columna role de modificaciones no autorizadas en updates
+create or replace function public.check_role_change()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+begin
+  -- Si la petición es de un usuario autenticado del cliente y hay un cambio de rol...
+  if auth.role() = 'authenticated' and new.role <> old.role then
+    -- Solo permitimos el cambio si el usuario ejecutor ya es admin
+    if not exists (
+      select 1 from public.profiles
+      where id = auth.uid() and role = 'admin'
+    ) then
+      new.role := old.role; -- Revertir el cambio silenciosamente
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger enforce_profile_roles
+  before update on public.profiles
+  for each row execute function public.check_role_change();
+
+
 -- ============================================================================
 -- STRAINS (catálogo)
 -- ============================================================================
@@ -64,18 +89,22 @@ create table public.strains (
 create index strains_type_idx on public.strains (type);
 
 -- ============================================================================
--- CLUBS (asociaciones cannábicas con geolocalización)
+-- CLUBS / SPOTS (asociaciones y sitios chill con geolocalización)
 -- ============================================================================
+create type spot_category as enum ('asociacion', 'mirador', 'parque', 'banco', 'playa', 'spot_relax', 'otro');
+
 create table public.clubs (
   id                    uuid primary key default gen_random_uuid(),
   slug                  text unique not null,
   name                  text not null,
+  category              spot_category not null default 'asociacion',
   description           text,
   address               text not null,
   city                  text not null,
   country               text not null default 'ES',
   location              geography(point, 4326) not null,
   membership_required   boolean not null default true,
+  tags                  text[] not null default '{}',
   website               text,
   phone                 text,
   email                 text,
