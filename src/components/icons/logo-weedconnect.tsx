@@ -1,5 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface LogoProps extends React.SVGProps<SVGSVGElement> {
   showText?: boolean;
@@ -156,16 +157,15 @@ export function LogoWeedConnect({
 
   if (showText) {
     return (
-      <div className="flex items-center gap-2">
-        {leafIcon}
-        <span
-          className={cn(
-            "font-sans font-semibold tracking-tight text-brand-green dark:text-brand-gold",
-            textClassName
-          )}
-        >
-          WeedConnect
-        </span>
+      <div className={cn("relative overflow-hidden rounded-lg border border-border/20 bg-white shadow-sm shadow-black/5 transition-shadow hover:shadow duration-200 w-auto aspect-[2/1]", className, "w-auto")}>
+        <Image
+          src="/images/logo_weedconnect.jpg"
+          alt="WeedConnect Logo"
+          fill
+          sizes="160px"
+          priority
+          className="object-cover"
+        />
       </div>
     );
   }

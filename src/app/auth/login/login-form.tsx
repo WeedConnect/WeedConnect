@@ -33,7 +33,7 @@ export function LoginForm() {
         setError(signInError.message);
         return;
       }
-      router.push("/");
+      router.push("/feed");
       router.refresh();
     } finally {
       setLoading(false);

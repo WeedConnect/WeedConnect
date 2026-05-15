@@ -74,3 +74,38 @@ export interface GrowLog {
   finishedAt?: string;
   entries: GrowLogEntry[];
 }
+
+export interface SocialComment {
+  id: ID;
+  postId: ID;
+  authorId: ID;
+  content: string;
+  createdAt: string;
+  author?: {
+    id: ID;
+    username: string;
+    displayName?: string;
+    avatarUrl?: string;
+  };
+}
+
+export interface SocialPost {
+  id: ID;
+  authorId: ID;
+  content: string;
+  mediaUrls: string[];
+  createdAt: string;
+  author?: {
+    id: ID;
+    username: string;
+    displayName?: string;
+    avatarUrl?: string;
+  };
+  likesCount: number;
+  isLikedByUser?: boolean;
+  commentsCount?: number;
+  comments?: SocialComment[];
+  bookmarksCount?: number;
+  isBookmarkedByUser?: boolean;
+}
+

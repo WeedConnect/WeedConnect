@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import { Suspense } from "react";
 import { LogoWeedConnect } from "@/components/icons/logo-weedconnect";
 import { NetworkBackground } from "@/components/ui/network-background";
@@ -33,11 +34,17 @@ function AgeGateInner() {
 
       <div className="w-full max-w-md text-center glass-panel-premium border-gradient-gold rounded-3xl p-8 sm:p-10 flex flex-col items-center z-10">
         {/* Brand Logo & Icon */}
-        <div className="mb-8 transform transition-all duration-700 hover:scale-105">
-          <LogoWeedConnect className="size-20 md:size-24 mb-3 drop-shadow-md" />
-          <h2 className="text-2xl font-black tracking-tight text-brand-green dark:text-gradient-gold">
-            WeedConnect
-          </h2>
+        <div className="mb-8 transform transition-all duration-500 hover:scale-[1.02] w-full max-w-[280px] mx-auto">
+          <div className="relative overflow-hidden rounded-2xl border border-border/40 shadow-sm shadow-black/5 hover:shadow-md transition-all">
+            <Image
+              src="/images/logo_weedconnect.jpg"
+              alt="WeedConnect Logo"
+              width={300}
+              height={150}
+              priority
+              className="object-cover aspect-[2/1] w-full h-auto"
+            />
+          </div>
         </div>
 
         <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent mb-6" />

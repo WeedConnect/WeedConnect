@@ -325,3 +325,78 @@ create policy "events update" on public.events for update using (
 create policy "events delete" on public.events for delete using (
   exists (select 1 from public.profiles where id = auth.uid() and role in ('admin', 'moderator'))
 );
+
+-- ============================================================================
+-- SOCIAL FEED (muro social y likes)
+-- ============================================================================
+create table public.social_posts (
+  id          uuid primary key default gen_random_uuid(),
+  author_id   uuid not null references public.profiles(id) on delete cascade,
+  content     text not null check (char_length(content) <= 500),
+  media_urls  text[] not null default '{}',
+  created_at  timestamptz not null default now()
+);
+
+create index social_posts_author_idx on public.social_posts (author_id, created_at desc);
+
+create table public.social_likes (
+  post_id     uuid not null references public.social_posts(id) on delete cascade,
+  user_id     uuid not null references public.profiles(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (post_id, user_id)
+);
+
+create index social_likes_post_idx on public.social_likes (post_id);
+
+alter table public.social_posts enable row level security;
+alter table public.social_likes enable row level security;
+
+-- Políticas social_posts: lectura pública, escritura solo el autor
+create policy "social_posts read"   on public.social_posts for select using (true);
+create policy "social_posts insert" on public.social_posts for insert with check (auth.uid() = author_id);
+create policy "social_posts delete" on public.social_posts for delete using (auth.uid() = author_id);
+
+-- Políticas social_likes: lectura pública, escritura solo el usuario
+create policy "social_likes read"   on public.social_likes for select using (true);
+create policy "social_likes insert" on public.social_likes for insert with check (auth.uid() = user_id);
+create policy "social_likes delete" on public.social_likes for delete using (auth.uid() = user_id);
+
+
+-- ============================================================================
+-- SOCIAL FEED (comentarios y bookmarks)
+-- ============================================================================
+
+-- Comentarios
+create table public.social_comments (
+  id          uuid primary key default gen_random_uuid(),
+  post_id     uuid not null references public.social_posts(id) on delete cascade,
+  author_id   uuid not null references public.profiles(id) on delete cascade,
+  content     text not null check (char_length(content) <= 300),
+  created_at  timestamptz not null default now()
+);
+
+create index social_comments_post_idx on public.social_comments (post_id, created_at asc);
+
+alter table public.social_comments enable row level security;
+
+create policy "social_comments read"   on public.social_comments for select using (true);
+create policy "social_comments insert" on public.social_comments for insert with check (auth.uid() = author_id);
+create policy "social_comments delete" on public.social_comments for delete using (auth.uid() = author_id);
+
+-- Bookmarks (Publicaciones Guardadas)
+create table public.social_bookmarks (
+  post_id     uuid not null references public.social_posts(id) on delete cascade,
+  user_id     uuid not null references public.profiles(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (post_id, user_id)
+);
+
+create index social_bookmarks_user_idx on public.social_bookmarks (user_id);
+
+alter table public.social_bookmarks enable row level security;
+
+create policy "social_bookmarks read"   on public.social_bookmarks for select using (auth.uid() = user_id);
+create policy "social_bookmarks insert" on public.social_bookmarks for insert with check (auth.uid() = user_id);
+create policy "social_bookmarks delete" on public.social_bookmarks for delete using (auth.uid() = user_id);
+
+

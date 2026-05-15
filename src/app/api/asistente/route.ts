@@ -3,7 +3,7 @@ import { streamText, tool, stepCountIs } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { MOCK_STRAINS } from "@/data/strains";
-import { MOCK_CLUBS } from "@/data/clubs";
+import { getClubs } from "@/lib/clubs";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -64,7 +64,8 @@ export async function POST(req: NextRequest) {
         }),
         execute: async ({ ciudad }: { ciudad: string }) => {
           const c = ciudad.toLowerCase();
-          return MOCK_CLUBS.filter((club) => club.city.toLowerCase().includes(c)).slice(0, 4);
+          const clubs = await getClubs();
+          return clubs.filter((club) => club.city.toLowerCase().includes(c)).slice(0, 4);
         },
       }),
     },

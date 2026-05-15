@@ -7,6 +7,7 @@ export const MAIN_NAV: NavItem[] = [
     href: "/comunidad",
     label: "Comunidad",
     children: [
+      { href: "/feed", label: "Muro Social" },
       { href: "/comunidad/foro", label: "Foro" },
       { href: "/comunidad/eventos", label: "Eventos y ferias" },
       { href: "/comunidad/blog", label: "Blog" },

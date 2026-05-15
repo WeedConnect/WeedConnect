@@ -12,12 +12,13 @@ Estos son los pasos que requieren tu intervención (cuentas externas, dinero, de
 3. **Habilitar extensiones**: ve a `Database → Extensions` y activa:
    - `postgis` (geolocalización del mapa)
    - `pgcrypto` (UUIDs — normalmente ya está)
-4. **Ejecutar la migración**: copia el contenido de `supabase/migrations/0001_init.sql` y pégalo en `SQL Editor → New query → Run`. Luego haz lo mismo con `supabase/seed.sql` para los datos de ejemplo. *(Nota: El archivo incluye un parche crítico de seguridad del `SecurityAgent` para evitar escalada de roles).*
+4. **Ejecutar la migración**: copia el contenido de `supabase/migrations/0001_init.sql` y pégalo en `SQL Editor → New query → Run`. Luego haz lo mismo con `supabase/seed.sql` para los datos de ejemplo. *(Nota: El archivo incluye un parche crítico de seguridad del `SecurityAgent` para evitar escalada de roles y el esquema del **Muro Social / Feed**).* Si ya aplicaste la migración inicial previamente, solo debes ejecutar la sección final de `0001_init.sql` dedicada al **SOCIAL FEED**.
 5. **Crear storage buckets**: en `Storage → New bucket`, crea:
    - `avatars` (público)
    - `strain-photos` (público)
    - `grow-photos` (privado — solo dueño)
    - `forum-photos` (público)
+   - `social-photos` (público — configurar políticas para permitir SELECT público e INSERT para usuarios autenticados)
 6. **Copiar credenciales**: ve a `Project Settings → API` y copia:
    - Project URL
    - `anon` public key

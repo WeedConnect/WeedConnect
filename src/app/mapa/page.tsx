@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MOCK_CLUBS } from "@/data/clubs";
+import { getClubs } from "@/lib/clubs";
 import { MapView } from "./map-view";
 
 export const metadata: Metadata = {
@@ -8,7 +8,9 @@ export const metadata: Metadata = {
     "Encuentra asociaciones legales y los mejores sitios (spots) chill para relajarte: miradores, parques y zonas con vistas. Datos de la comunidad.",
 };
 
-export default function MapaPage() {
+export default async function MapaPage() {
+  const clubs = await getClubs();
+
   return (
     <section className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6">
       <header>
@@ -19,7 +21,7 @@ export default function MapaPage() {
         </p>
       </header>
 
-      <MapView clubs={MOCK_CLUBS} />
+      <MapView clubs={clubs} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <p className="rounded-md border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700/40 dark:bg-amber-950/40 dark:text-amber-200">

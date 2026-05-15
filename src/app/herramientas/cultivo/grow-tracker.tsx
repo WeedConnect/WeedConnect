@@ -1,7 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Sprout, Droplets, FlaskConical, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Sprout,
+  Droplets,
+  FlaskConical,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  Cloud,
+  CloudLightning,
+  Loader2,
+  Database,
+  Info,
+  ArrowRight
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -10,6 +25,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type { GrowLog, GrowLogEntry, GrowStage } from "@/types";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import {
+  fetchGrowLogs,
+  createGrowLog,
+  deleteGrowLog,
+  addGrowEntry,
+  deleteGrowEntry,
+} from "@/lib/grow";
 
 const STORAGE_KEY = "wc_grow_logs";
 
@@ -46,6 +69,16 @@ function formatDate(iso: string) {
 }
 
 export function GrowTracker() {
+  const [supabase] = useState(() => createClient());
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [user, setUser] = useState<any | null>(null);
+
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasLocalData, setHasLocalData] = useState(false);
+  const [isMigrating, setIsMigrating] = useState(false);
+
   const [logs, setLogs] = useState<GrowLog[]>([]);
   const [selectedLog, setSelectedLog] = useState<string | null>(null);
   const [showNewLog, setShowNewLog] = useState(false);
@@ -63,83 +96,246 @@ export function GrowTracker() {
   const [newEntryNutrients, setNewEntryNutrients] = useState("");
 
   useEffect(() => {
+    async function init() {
+      try {
+        // Comprobar si hay datos previos locales
+        const stored = localStorage.getItem(STORAGE_KEY);
+        let hasLocal = false;
+        let localLogs: GrowLog[] = [];
+        try {
+          if (stored) {
+            localLogs = JSON.parse(stored);
+            hasLocal = Array.isArray(localLogs) && localLogs.length > 0;
+          }
+        } catch {}
+        setHasLocalData(hasLocal);
+
+        // Comprobar sesión del usuario
+        const { data } = await supabase.auth.getUser();
+        const currentUser = data?.user;
+        setUser(currentUser);
+
+        if (currentUser) {
+          // Cargar desde la nube
+          setIsLoadingData(true);
+          const cloudLogs = await fetchGrowLogs(supabase);
+          setLogs(cloudLogs);
+          if (cloudLogs.length > 0) {
+            setSelectedLog(cloudLogs[0].id);
+          }
+        } else {
+          // Cargar desde localStorage si es invitado
+          setLogs(localLogs);
+          if (localLogs.length > 0) {
+            setSelectedLog(localLogs[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("[GrowTracker] Error initializing:", err);
+      } finally {
+        setIsLoadingSession(false);
+        setIsLoadingData(false);
+      }
+    }
+
+    init();
+  }, [supabase]);
+
+  async function handleMigrateLocalData() {
+    if (!user) return;
+    setIsMigrating(true);
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (stored) setLogs(JSON.parse(stored));
-    } catch {}
-  }, []);
+      if (!stored) return;
+      
+      const localLogs: GrowLog[] = JSON.parse(stored);
+      
+      // Migrar cada cultivo y sus entradas
+      for (const log of localLogs) {
+        const createdLog = await createGrowLog(supabase, {
+          id: crypto.randomUUID(), // Asegurar UUID
+          name: log.name,
+          startedAt: log.startedAt,
+          finishedAt: log.finishedAt,
+          strainId: log.strainId,
+        });
+        
+        // Subir entradas para este cultivo (en orden cronológico ascendente)
+        const sortedEntries = [...log.entries].sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+        for (const entry of sortedEntries) {
+          await addGrowEntry(supabase, createdLog.id, {
+             ...entry,
+             id: crypto.randomUUID(),
+          });
+        }
+      }
 
-
-  function saveLogs(updated: GrowLog[]) {
-    setLogs(updated);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      // Refrescar datos actualizados de la nube
+      const cloudLogs = await fetchGrowLogs(supabase);
+      setLogs(cloudLogs);
+      
+      // Limpiar almacenamiento local tras el éxito
+      localStorage.removeItem(STORAGE_KEY);
+      setHasLocalData(false);
+      
+      if (cloudLogs.length > 0) {
+        setSelectedLog(cloudLogs[0].id);
+      }
+      
+      alert("🎉 ¡Tus cultivos locales se han sincronizado con tu cuenta con éxito!");
+    } catch (err) {
+      console.error("[GrowTracker] Error en migración:", err);
+      alert("Ocurrió un error sincronizando tus cultivos locales. Por favor intenta de nuevo.");
+    } finally {
+      setIsMigrating(false);
+    }
   }
 
-  function createLog() {
+  async function createLog() {
     if (!newLogName.trim()) return;
-    const log: GrowLog = {
-      id: uid(),
-      userId: "local",
+    setIsSaving(true);
+    
+    const logId = uid();
+    const newLogData = {
+      id: logId,
       name: newLogName.trim(),
       strainId: newLogStrain.trim() || undefined,
       startedAt: new Date().toISOString(),
-      entries: [],
     };
-    const updated = [log, ...logs];
-    saveLogs(updated);
-    setSelectedLog(log.id);
-    setShowNewLog(false);
-    setNewLogName("");
-    setNewLogStrain("");
+
+    try {
+      if (user) {
+        const createdLog = await createGrowLog(supabase, newLogData);
+        setLogs([createdLog, ...logs]);
+        setSelectedLog(createdLog.id);
+      } else {
+        const log: GrowLog = {
+          ...newLogData,
+          userId: "local",
+          entries: [],
+        };
+        const updated = [log, ...logs];
+        setLogs(updated);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        setSelectedLog(log.id);
+      }
+
+      setShowNewLog(false);
+      setNewLogName("");
+      setNewLogStrain("");
+    } catch (err) {
+      console.error("[GrowTracker] Error al crear cultivo:", err);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
-  function deleteLog(id: string) {
-    saveLogs(logs.filter((l) => l.id !== id));
-    if (selectedLog === id) setSelectedLog(null);
+  async function deleteLog(id: string) {
+    if (!confirm("¿Estás seguro de que deseas eliminar este cultivo y todas sus entradas de forma permanente?")) {
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      if (user) {
+        await deleteGrowLog(supabase, id);
+      }
+      
+      const updated = logs.filter((l) => l.id !== id);
+      setLogs(updated);
+      
+      if (!user) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      }
+      
+      if (selectedLog === id) setSelectedLog(null);
+    } catch (err) {
+      console.error("[GrowTracker] Error al eliminar cultivo:", err);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
-  function addEntry() {
+  async function addEntry() {
     if (!selectedLog) return;
-    const nutrients = newEntryNutrients
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((s) => {
-        const [name, dosage] = s.split(":").map((x) => x.trim());
-        return { name: name ?? s, dosageMl: parseFloat(dosage ?? "0") || 0 };
-      });
+    setIsSaving(true);
 
-    const entry: GrowLogEntry = {
-      id: uid(),
-      date: newEntryDate,
-      stage: newEntryStage,
-      notes: newEntryNotes.trim() || undefined,
-      watering:
-        newEntryWaterMl
-          ? { amountMl: parseFloat(newEntryWaterMl), ph: newEntryPh ? parseFloat(newEntryPh) : undefined }
-          : undefined,
-      nutrients: nutrients.length > 0 ? nutrients : undefined,
-    };
+    try {
+      const nutrients = newEntryNutrients
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s) => {
+          const [name, dosage] = s.split(":").map((x) => x.trim());
+          return { name: name ?? s, dosageMl: parseFloat(dosage ?? "0") || 0 };
+        });
 
-    const updated = logs.map((l) =>
-      l.id === selectedLog
-        ? { ...l, entries: [entry, ...l.entries] }
-        : l,
-    );
-    saveLogs(updated);
-    setShowNewEntry(false);
-    setNewEntryNotes("");
-    setNewEntryWaterMl("");
-    setNewEntryPh("");
-    setNewEntryNutrients("");
+      const entryData: GrowLogEntry = {
+        id: uid(),
+        date: newEntryDate,
+        stage: newEntryStage,
+        notes: newEntryNotes.trim() || undefined,
+        watering:
+          newEntryWaterMl
+            ? { amountMl: parseFloat(newEntryWaterMl), ph: newEntryPh ? parseFloat(newEntryPh) : undefined }
+            : undefined,
+        nutrients: nutrients.length > 0 ? nutrients : undefined,
+      };
+
+      if (user) {
+        const createdEntry = await addGrowEntry(supabase, selectedLog, entryData);
+        const updated = logs.map((l) =>
+          l.id === selectedLog
+            ? { ...l, entries: [createdEntry, ...l.entries] }
+            : l,
+        );
+        setLogs(updated);
+      } else {
+        const updated = logs.map((l) =>
+          l.id === selectedLog
+            ? { ...l, entries: [entryData, ...l.entries] }
+            : l,
+        );
+        setLogs(updated);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      }
+
+      setShowNewEntry(false);
+      setNewEntryNotes("");
+      setNewEntryWaterMl("");
+      setNewEntryPh("");
+      setNewEntryNutrients("");
+    } catch (err) {
+      console.error("[GrowTracker] Error al añadir entrada:", err);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
-  function deleteEntry(logId: string, entryId: string) {
-    const updated = logs.map((l) =>
-      l.id === logId ? { ...l, entries: l.entries.filter((e) => e.id !== entryId) } : l,
-    );
-    saveLogs(updated);
+  async function deleteEntry(logId: string, entryId: string) {
+    if (!confirm("¿Eliminar esta entrada del diario?")) return;
+    
+    setIsSaving(true);
+    try {
+      if (user) {
+        await deleteGrowEntry(supabase, entryId);
+      }
+      
+      const updated = logs.map((l) =>
+        l.id === logId ? { ...l, entries: l.entries.filter((e) => e.id !== entryId) } : l,
+      );
+      setLogs(updated);
+      
+      if (!user) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      }
+    } catch (err) {
+      console.error("[GrowTracker] Error al eliminar entrada:", err);
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   function toggleEntry(id: string) {
@@ -157,21 +353,79 @@ export function GrowTracker() {
     <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <header className="mb-8 flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Seguimiento de cultivo</h1>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl flex flex-wrap items-center gap-2">
+            Seguimiento de cultivo
+            {!isLoadingSession && (
+              user ? (
+                <Badge className="h-6 gap-1 bg-emerald-100 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950 dark:text-emerald-200 font-medium border border-emerald-300/30">
+                  <Cloud className="size-3" /> Nube
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="h-6 gap-1 border-amber-200 bg-amber-50/50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300 font-medium">
+                  <Database className="size-3" /> Local
+                </Badge>
+              )
+            )}
+          </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
-            Registra tus cultivos: riegos, nutrientes, fases y notas. Todo se guarda en tu
-            navegador — sin cuenta necesaria.
+            Registra tus cultivos: riegos, nutrientes, fases y notas.
           </p>
+          {!isLoadingSession && !user && (
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-semibold animate-pulse">
+              <Info className="size-3.5 shrink-0" />
+              💾 Guardando en local. Inicia sesión para sincronizar en la nube con tu cuenta.
+            </div>
+          )}
         </div>
         <Button
           onClick={() => setShowNewLog((v) => !v)}
           size="sm"
+          disabled={isLoadingSession || isLoadingData || isSaving}
           className="shrink-0 gap-1.5"
         >
           <Plus className="size-4" />
           Nuevo cultivo
         </Button>
       </header>
+
+      {/* Banner de Migración de Datos Locales */}
+      {user && hasLocalData && (
+        <div className="mb-6 rounded-lg border border-emerald-300/50 bg-emerald-50/60 p-4 dark:border-emerald-800/50 dark:bg-emerald-950/20">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-full bg-emerald-100 p-1.5 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+                <CloudLightning className="size-4 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-emerald-900 dark:text-emerald-200">
+                  ¿Sincronizar tus datos locales a la nube?
+                </h3>
+                <p className="text-xs text-emerald-800/80 dark:text-emerald-300/70">
+                  Hemos detectado cultivos guardados previamente en este navegador. Puedes subirlos y guardarlos permanentemente en tu cuenta de WeedConnect.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              onClick={handleMigrateLocalData}
+              disabled={isMigrating}
+              className="shrink-0 gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+            >
+              {isMigrating ? (
+                <>
+                  <Loader2 className="size-3.5 animate-spin" />
+                  Sincronizando...
+                </>
+              ) : (
+                <>
+                  Migrar a la Nube
+                  <ArrowRight className="size-3.5" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {showNewLog && (
         <Card className="mb-6 border-emerald-300 dark:border-emerald-800">
@@ -186,6 +440,7 @@ export function GrowTracker() {
                 placeholder="p. ej. White Widow armario 80x80"
                 value={newLogName}
                 onChange={(e) => setNewLogName(e.target.value)}
+                disabled={isSaving}
               />
             </div>
             <div className="grid gap-2">
@@ -195,11 +450,21 @@ export function GrowTracker() {
                 placeholder="p. ej. White Widow"
                 value={newLogStrain}
                 onChange={(e) => setNewLogStrain(e.target.value)}
+                disabled={isSaving}
               />
             </div>
             <div className="flex gap-2">
-              <Button onClick={createLog} size="sm">Crear cultivo</Button>
-              <Button variant="ghost" size="sm" onClick={() => setShowNewLog(false)}>
+              <Button onClick={createLog} size="sm" disabled={isSaving || !newLogName.trim()}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="size-4 animate-spin mr-1.5" />
+                    Creando...
+                  </>
+                ) : (
+                  "Crear cultivo"
+                )}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setShowNewLog(false)} disabled={isSaving}>
                 Cancelar
               </Button>
             </div>
@@ -207,7 +472,12 @@ export function GrowTracker() {
         </Card>
       )}
 
-      {logs.length === 0 && !showNewLog ? (
+      {isLoadingSession || isLoadingData ? (
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-20 text-center gap-3">
+          <Loader2 className="size-10 animate-spin text-emerald-600" />
+          <p className="text-muted-foreground text-sm">Accediendo al diario de cultivos...</p>
+        </div>
+      ) : logs.length === 0 && !showNewLog ? (
         <div className="rounded-lg border border-dashed border-border py-16 text-center">
           <Sprout className="mx-auto mb-3 size-10 text-muted-foreground/40" aria-hidden />
           <p className="text-muted-foreground">No tienes ningún cultivo registrado todavía.</p>
@@ -215,7 +485,7 @@ export function GrowTracker() {
             Pulsa{" "}
             <button
               onClick={() => setShowNewLog(true)}
-              className="text-emerald-600 hover:underline"
+              className="text-emerald-600 hover:underline font-medium"
             >
               Nuevo cultivo
             </button>{" "}
@@ -238,22 +508,23 @@ export function GrowTracker() {
                     : "border-border hover:bg-muted/50",
                 )}
               >
-                <div>
-                  <p className="font-medium leading-snug">{log.name}</p>
+                <div className="overflow-hidden">
+                  <p className="font-medium leading-snug truncate">{log.name}</p>
                   {log.strainId && (
-                    <p className="text-xs text-muted-foreground">{log.strainId}</p>
+                    <p className="text-xs text-muted-foreground truncate">{log.strainId}</p>
                   )}
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    Inicio: {formatDate(log.startedAt)} · {log.entries.length} entradas
+                  <p className="mt-0.5 text-xs text-muted-foreground whitespace-nowrap">
+                    Inicio: {formatDate(log.startedAt)} · {log.entries?.length || 0} {log.entries?.length === 1 ? "entrada" : "entradas"}
                   </p>
                 </div>
                 <button
                   type="button"
+                  disabled={isSaving}
                   onClick={(e) => {
                     e.stopPropagation();
                     deleteLog(log.id);
                   }}
-                  className="shrink-0 text-muted-foreground/40 hover:text-destructive"
+                  className="shrink-0 text-muted-foreground/40 hover:text-destructive transition-colors focus:outline-none p-0.5 rounded"
                   aria-label="Eliminar cultivo"
                 >
                   <Trash2 className="size-3.5" />
@@ -266,15 +537,16 @@ export function GrowTracker() {
           {activeLog ? (
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-semibold">{activeLog.name}</h2>
+                <div className="overflow-hidden">
+                  <h2 className="text-xl font-semibold truncate">{activeLog.name}</h2>
                   {activeLog.strainId && (
-                    <p className="text-sm text-muted-foreground">{activeLog.strainId}</p>
+                    <p className="text-sm text-muted-foreground truncate">{activeLog.strainId}</p>
                   )}
                 </div>
                 <Button
                   size="sm"
                   onClick={() => setShowNewEntry((v) => !v)}
+                  disabled={isSaving}
                   className="shrink-0 gap-1.5"
                 >
                   <Plus className="size-4" />
@@ -283,8 +555,8 @@ export function GrowTracker() {
               </div>
 
               {showNewEntry && (
-                <Card className="border-emerald-300 dark:border-emerald-800">
-                  <CardHeader>
+                <Card className="border-emerald-300 dark:border-emerald-800 shadow-sm">
+                  <CardHeader className="pb-3">
                     <CardTitle className="text-sm">Nueva entrada</CardTitle>
                   </CardHeader>
                   <CardContent className="flex flex-col gap-4">
@@ -296,6 +568,7 @@ export function GrowTracker() {
                           type="date"
                           value={newEntryDate}
                           onChange={(e) => setNewEntryDate(e.target.value)}
+                          disabled={isSaving}
                         />
                       </div>
                       <div className="grid gap-1.5">
@@ -305,6 +578,7 @@ export function GrowTracker() {
                           value={newEntryStage}
                           onChange={(e) => setNewEntryStage(e.target.value as GrowStage)}
                           className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          disabled={isSaving}
                         >
                           {STAGES.map((s) => (
                             <option key={s} value={s}>
@@ -323,6 +597,7 @@ export function GrowTracker() {
                           placeholder="p. ej. 500"
                           value={newEntryWaterMl}
                           onChange={(e) => setNewEntryWaterMl(e.target.value)}
+                          disabled={isSaving}
                         />
                       </div>
                       <div className="grid gap-1.5">
@@ -334,6 +609,7 @@ export function GrowTracker() {
                           placeholder="p. ej. 6.2"
                           value={newEntryPh}
                           onChange={(e) => setNewEntryPh(e.target.value)}
+                          disabled={isSaving}
                         />
                       </div>
                     </div>
@@ -346,6 +622,7 @@ export function GrowTracker() {
                         placeholder="p. ej. Grow:2, Bloom:1, CalMag:0.5"
                         value={newEntryNutrients}
                         onChange={(e) => setNewEntryNutrients(e.target.value)}
+                        disabled={isSaving}
                       />
                     </div>
                     <div className="grid gap-1.5">
@@ -356,13 +633,21 @@ export function GrowTracker() {
                         value={newEntryNotes}
                         onChange={(e) => setNewEntryNotes(e.target.value)}
                         rows={3}
+                        disabled={isSaving}
                       />
                     </div>
-                    <div className="flex gap-2">
-                      <Button onClick={addEntry} size="sm">
-                        Guardar entrada
+                    <div className="flex gap-2 pt-1">
+                      <Button onClick={addEntry} size="sm" disabled={isSaving}>
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="size-4 animate-spin mr-1.5" />
+                            Guardando...
+                          </>
+                        ) : (
+                          "Guardar entrada"
+                        )}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setShowNewEntry(false)}>
+                      <Button variant="ghost" size="sm" onClick={() => setShowNewEntry(false)} disabled={isSaving}>
                         Cancelar
                       </Button>
                     </div>
@@ -370,7 +655,7 @@ export function GrowTracker() {
                 </Card>
               )}
 
-              {activeLog.entries.length === 0 ? (
+              {(!activeLog.entries || activeLog.entries.length === 0) ? (
                 <div className="rounded-lg border border-dashed border-border py-12 text-center text-sm text-muted-foreground">
                   No hay entradas todavía. Añade la primera para empezar el diario de cultivo.
                 </div>
@@ -380,7 +665,7 @@ export function GrowTracker() {
                     const expanded = expandedEntries.has(entry.id);
                     return (
                       <li key={entry.id}>
-                        <Card>
+                        <Card className="transition-all hover:shadow-sm">
                           <div
                             className="flex cursor-pointer items-center gap-3 px-4 py-3"
                             onClick={() => toggleEntry(entry.id)}
@@ -396,22 +681,21 @@ export function GrowTracker() {
                                   {STAGE_LABEL[entry.stage]}
                                 </Badge>
                                 {entry.watering && (
-                                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1 text-xs text-muted-foreground bg-blue-50/50 dark:bg-blue-950/20 px-1.5 py-0.5 rounded">
                                     <Droplets className="size-3 text-blue-500" />
                                     {entry.watering.amountMl}ml
                                     {entry.watering.ph && ` · pH ${entry.watering.ph}`}
                                   </span>
                                 )}
                                 {entry.nutrients && entry.nutrients.length > 0 && (
-                                  <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1 text-xs text-muted-foreground bg-emerald-50/50 dark:bg-emerald-950/20 px-1.5 py-0.5 rounded">
                                     <FlaskConical className="size-3 text-emerald-500" />
-                                    {entry.nutrients.length} nutriente
-                                    {entry.nutrients.length > 1 ? "s" : ""}
+                                    {entry.nutrients.length} {entry.nutrients.length === 1 ? "nutriente" : "nutrientes"}
                                   </span>
                                 )}
                                 {entry.notes && (
                                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <FileText className="size-3" />
+                                    <FileText className="size-3 text-slate-400" />
                                     nota
                                   </span>
                                 )}
@@ -420,11 +704,12 @@ export function GrowTracker() {
                             <div className="flex items-center gap-2">
                               <button
                                 type="button"
+                                disabled={isSaving}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   deleteEntry(activeLog.id, entry.id);
                                 }}
-                                className="text-muted-foreground/40 hover:text-destructive"
+                                className="text-muted-foreground/40 hover:text-destructive transition-colors p-0.5 rounded"
                                 aria-label="Eliminar entrada"
                               >
                                 <Trash2 className="size-3.5" />
@@ -438,26 +723,30 @@ export function GrowTracker() {
                           </div>
                           {expanded && (
                             <CardContent className="pt-0">
-                              <div className="border-t border-border pt-3">
+                              <div className="border-t border-border pt-3 animate-tw-animate-fade-in">
                                 {entry.watering && (
-                                  <div className="mb-2 text-sm">
-                                    <span className="font-medium">Riego:</span>{" "}
-                                    {entry.watering.amountMl} ml
-                                    {entry.watering.ph && ` · pH ${entry.watering.ph}`}
+                                  <div className="mb-2 text-sm flex gap-2">
+                                    <span className="font-medium text-muted-foreground">Riego:</span>{" "}
+                                    <span>
+                                      {entry.watering.amountMl} ml
+                                      {entry.watering.ph && ` · pH ${entry.watering.ph}`}
+                                    </span>
                                   </div>
                                 )}
                                 {entry.nutrients && entry.nutrients.length > 0 && (
-                                  <div className="mb-2 text-sm">
-                                    <span className="font-medium">Nutrientes:</span>{" "}
-                                    {entry.nutrients
-                                      .map((n) => `${n.name} ${n.dosageMl}ml`)
-                                      .join(", ")}
+                                  <div className="mb-2 text-sm flex gap-2">
+                                    <span className="font-medium text-muted-foreground">Nutrientes:</span>{" "}
+                                    <span>
+                                      {entry.nutrients
+                                        .map((n) => `${n.name} (${n.dosageMl}ml)`)
+                                        .join(", ")}
+                                    </span>
                                   </div>
                                 )}
                                 {entry.notes && (
-                                  <div className="text-sm">
-                                    <span className="font-medium">Notas:</span>{" "}
-                                    <span className="text-muted-foreground">{entry.notes}</span>
+                                  <div className="text-sm flex flex-col gap-1 mt-1 bg-muted/30 p-2 rounded-md">
+                                    <span className="font-medium text-xs text-muted-foreground">Notas:</span>{" "}
+                                    <span className="text-foreground">{entry.notes}</span>
                                   </div>
                                 )}
                               </div>
@@ -478,10 +767,15 @@ export function GrowTracker() {
         </div>
       )}
 
-      <p className="mt-8 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3 text-center text-sm text-muted-foreground">
-        Los datos se guardan en tu navegador (localStorage). Próximamente: sincronización en la nube
-        con tu cuenta de WeedConnect.
-      </p>
+      <footer className="mt-8 rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3 text-center text-sm text-muted-foreground">
+        {!user ? (
+          "Estás usando almacenamiento local. Los datos no se guardarán en múltiples dispositivos hasta que inicies sesión."
+        ) : (
+          <span className="flex items-center justify-center gap-1.5">
+            <Cloud className="size-4 text-emerald-500" /> Tus cultivos están sincronizados de forma segura en tu cuenta de WeedConnect.
+          </span>
+        )}
+      </footer>
     </section>
   );
 }
