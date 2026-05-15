@@ -21,6 +21,11 @@ interface SelectedFile {
   preview: string;
 }
 
+// Límites de subida — deben coincidir con la config del bucket `social-photos`
+// en Supabase (ver TODO_USUARIO.md).
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
 export function CreatePostBox({ user }: CreatePostBoxProps) {
   const [content, setContent] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -42,12 +47,35 @@ export function CreatePostBox({ user }: CreatePostBoxProps) {
       // Límite máximo de 4 fotos
       const remainingSlots = 4 - selectedFiles.length;
       const filesToAdd = filesArray.slice(0, remainingSlots);
-      
+
       if (filesArray.length > remainingSlots) {
         setError("Solo puedes subir hasta 4 fotos por publicación.");
       }
 
-      const newFiles = filesToAdd.map(file => ({
+      // Validar tipo y tamaño antes de aceptar los archivos
+      const validFiles: File[] = [];
+      let rejectedType = false;
+      let rejectedSize = false;
+
+      for (const file of filesToAdd) {
+        if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+          rejectedType = true;
+          continue;
+        }
+        if (file.size > MAX_FILE_SIZE) {
+          rejectedSize = true;
+          continue;
+        }
+        validFiles.push(file);
+      }
+
+      if (rejectedType) {
+        setError("Formato no admitido. Usa imágenes JPG, PNG, WEBP o GIF.");
+      } else if (rejectedSize) {
+        setError("Cada imagen debe pesar como máximo 5 MB.");
+      }
+
+      const newFiles = validFiles.map(file => ({
         file,
         preview: URL.createObjectURL(file)
       }));

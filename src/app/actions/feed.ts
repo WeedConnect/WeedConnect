@@ -16,6 +16,17 @@ export async function createSocialPost(content: string, mediaUrls: string[] = []
     return { success: false, error: "La publicación no puede superar los 500 caracteres." };
   }
 
+  // Validar adjuntos: máximo 4 y solo URLs http(s) válidas.
+  if (mediaUrls.length > 4) {
+    return { success: false, error: "Solo puedes adjuntar hasta 4 fotos por publicación." };
+  }
+  const invalidUrl = mediaUrls.some(
+    (url) => typeof url !== "string" || !/^https?:\/\//.test(url),
+  );
+  if (invalidUrl) {
+    return { success: false, error: "Una de las imágenes no es válida." };
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 

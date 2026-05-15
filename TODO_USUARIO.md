@@ -18,7 +18,13 @@ Estos son los pasos que requieren tu intervención (cuentas externas, dinero, de
    - `strain-photos` (público)
    - `grow-photos` (privado — solo dueño)
    - `forum-photos` (público)
-   - `social-photos` (público — configurar políticas para permitir SELECT público e INSERT para usuarios autenticados)
+   - `social-photos` (público — fotos del Muro Social). Al crearlo, en las
+     opciones del bucket activa **"Restrict file size"** = `5 MB` y en
+     **"Allowed MIME types"** pon: `image/jpeg, image/png, image/webp, image/gif`.
+     Las políticas RLS de este bucket (SELECT público, INSERT/DELETE solo del
+     dueño) **ya están en `0001_init.sql`** — si aplicaste la migración antes
+     de este cambio, re-ejecuta el bloque final "STORAGE — políticas del
+     bucket `social-photos`".
 6. **Copiar credenciales**: ve a `Project Settings → API` y copia:
    - Project URL
    - `anon` public key

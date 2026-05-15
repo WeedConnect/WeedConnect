@@ -400,3 +400,33 @@ create policy "social_bookmarks insert" on public.social_bookmarks for insert wi
 create policy "social_bookmarks delete" on public.social_bookmarks for delete using (auth.uid() = user_id);
 
 
+-- ============================================================================
+-- STORAGE — políticas del bucket `social-photos` (Muro Social)
+-- ============================================================================
+-- El bucket `social-photos` debe crearse manualmente en Storage → New bucket
+-- (público). Ver TODO_USUARIO.md. Estas políticas asumen que cada usuario sube
+-- a una carpeta con su propio uid: `<auth.uid()>/<timestamp>-<rand>.<ext>`
+-- (es el patrón que usa src/components/social/create-post-box.tsx).
+
+-- Lectura pública: cualquiera puede ver las fotos del muro.
+create policy "social-photos read"
+  on storage.objects for select
+  using ( bucket_id = 'social-photos' );
+
+-- Subida: solo usuarios autenticados, y únicamente a su propia carpeta.
+create policy "social-photos insert"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'social-photos'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Borrado: cada usuario solo puede borrar sus propias fotos.
+create policy "social-photos delete"
+  on storage.objects for delete
+  using (
+    bucket_id = 'social-photos'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+
