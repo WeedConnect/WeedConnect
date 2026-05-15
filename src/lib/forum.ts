@@ -13,6 +13,7 @@ export type ForumThread = {
   slug: string;
   title: string;
   body: string;
+  media_urls: string[];
   created_at: string;
   pinned: boolean;
   locked: boolean;
@@ -65,7 +66,7 @@ export async function getThreads(categorySlug?: string): Promise<ForumThread[]> 
   let query = supabase
     .from("forum_threads")
     .select(
-      "id, slug, title, body, created_at, pinned, locked, profiles!author_id(username), forum_categories!category_id(name, slug)",
+      "id, slug, title, body, media_urls, created_at, pinned, locked, profiles!author_id(username), forum_categories!category_id(name, slug)",
     )
     .order("pinned", { ascending: false })
     .order("created_at", { ascending: false });
@@ -99,7 +100,7 @@ export async function getThread(slug: string): Promise<ForumThread | null> {
   const { data } = await supabase
     .from("forum_threads")
     .select(
-      "id, slug, title, body, created_at, pinned, locked, profiles!author_id(username), forum_categories!category_id(name, slug)",
+      "id, slug, title, body, media_urls, created_at, pinned, locked, profiles!author_id(username), forum_categories!category_id(name, slug)",
     )
     .eq("slug", slug)
     .single();

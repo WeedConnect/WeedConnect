@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { uploadImage, publicImageUrl, validateImageFile } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Image as ImageIcon, X } from "lucide-react";
 import type { ForumCategory } from "@/lib/forum";
+
+const MAX_PHOTOS = 4;
 
 function slugify(text: string): string {
   return text
@@ -17,6 +21,11 @@ function slugify(text: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 80);
+}
+
+interface SelectedFile {
+  file: File;
+  preview: string;
 }
 
 export function NewThreadForm({
@@ -30,8 +39,41 @@ export function NewThreadForm({
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [photos, setPhotos] = useState<SelectedFile[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (files.length === 0) return;
+
+    const remaining = MAX_PHOTOS - photos.length;
+    if (files.length > remaining) {
+      setError(`Solo puedes adjuntar hasta ${MAX_PHOTOS} fotos por hilo.`);
+    }
+
+    const accepted: SelectedFile[] = [];
+    for (const file of files.slice(0, remaining)) {
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        setError(validationError);
+        continue;
+      }
+      accepted.push({ file, preview: URL.createObjectURL(file) });
+    }
+    setPhotos((prev) => [...prev, ...accepted]);
+  }
+
+  function removePhoto(index: number) {
+    setPhotos((prev) => {
+      const updated = [...prev];
+      URL.revokeObjectURL(updated[index].preview);
+      updated.splice(index, 1);
+      return updated;
+    });
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,25 +84,38 @@ export function NewThreadForm({
     const slug = slugify(title);
     const supabase = createClient();
 
-    const { error: err } = await supabase.from("forum_threads").insert({
-      category_id: categoryId,
-      author_id: userId,
-      slug,
-      title: title.trim(),
-      body: body.trim(),
-    });
+    try {
+      const mediaUrls: string[] = [];
+      for (const { file } of photos) {
+        const path = await uploadImage(supabase, "forum-photos", userId, file);
+        mediaUrls.push(publicImageUrl(supabase, "forum-photos", path));
+      }
 
-    if (err) {
-      setError(
-        err.message.includes("unique")
-          ? "Ya existe un hilo con un título muy similar en esa categoría. Prueba a ser más específico."
-          : err.message,
-      );
+      const { error: err } = await supabase.from("forum_threads").insert({
+        category_id: categoryId,
+        author_id: userId,
+        slug,
+        title: title.trim(),
+        body: body.trim(),
+        media_urls: mediaUrls,
+      });
+
+      if (err) {
+        setError(
+          err.message.includes("unique")
+            ? "Ya existe un hilo con un título muy similar en esa categoría. Prueba a ser más específico."
+            : err.message,
+        );
+        setLoading(false);
+        return;
+      }
+
+      photos.forEach((p) => URL.revokeObjectURL(p.preview));
+      router.push(`/comunidad/foro/${slug}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo publicar el hilo.");
       setLoading(false);
-      return;
     }
-
-    router.push(`/comunidad/foro/${slug}`);
   }
 
   return (
@@ -104,6 +159,56 @@ export function NewThreadForm({
           rows={7}
           required
         />
+      </div>
+
+      {/* Fotos adjuntas */}
+      <div className="space-y-2">
+        <Label>Fotos (opcional)</Label>
+        {photos.length > 0 && (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {photos.map((item, idx) => (
+              <div
+                key={idx}
+                className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={item.preview} alt="Vista previa" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(idx)}
+                  disabled={loading}
+                  className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-full bg-black/60 text-white"
+                  aria-label="Quitar foto"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <input
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          disabled={loading || photos.length >= MAX_PHOTOS}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={loading || photos.length >= MAX_PHOTOS}
+          onClick={() => fileInputRef.current?.click()}
+          className="gap-1.5"
+        >
+          <ImageIcon className="size-4" />
+          Añadir fotos
+        </Button>
+        <p className="text-xs text-muted-foreground">
+          Hasta {MAX_PHOTOS} imágenes · JPG, PNG, WEBP o GIF · máx. 5 MB cada una.
+        </p>
       </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

@@ -7,7 +7,7 @@ Lista maestra de funcionalidades a implementar. Marcadas con `[x]` cuando estén
 - [~] **Foro de cannabis** — comunidad / threads / posts / votos. Categorías extendidas (Experiencias, Munchies, Memes, Principiantes).
 - [~] **Recomendaciones de pelis** — listado curado y filtrado por "stoner mood" (Fumadón, Risas, Psicodélica, Clásico).
 - [~] **Recomendaciones de "gules" / munchies** — recetas + snacks + locales delivery cerca.
-- [ ] **Subida de fotos** — usar Supabase Storage.
+- [x] **Subida de fotos** — Supabase Storage. Muro Social (`social-photos`), avatares (`avatars`), hilos del foro (`forum-photos`) y diario de cultivo (`grow-photos`, privado + signed URLs). Todos con bucket + RLS + validación.
 - [ ] **IA integrada en la app** — chat asistente sobre cultivo, strains, dudas legales (Claude/OpenAI vía route handler streaming).
 - [~] **Mapa de spots chill y clubes** — asociaciones legales + miradores + parques + spots para relajarse (PostGIS + tags).
 - [ ] **Noticias** — feed de actualidad cannábica, mercado internacional y cultura.
@@ -52,7 +52,7 @@ Lista maestra de funcionalidades a implementar. Marcadas con `[x]` cuando estén
 ## Prioridad sugerida tras Fase 2
 
 1. Conectar Supabase real (auth + foro + strains desde BBDD).
-2. Subida de fotos (avatar + posts foro + fotos grow log).
+2. ✓ Subida de fotos (Muro Social, avatar, posts foro y fotos grow log — completado).
 3. Mapa con datos reales de clubes y crowd-sourced spots.
 4. Grow tracker conectado.
 5. IA asistente (route handler streaming + Anthropic).

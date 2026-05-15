@@ -14,10 +14,11 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { relativeTime } from "@/lib/forum";
+import { cn } from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -145,10 +146,16 @@ export default async function PerfilPage({ params }: PageProps) {
             {/* Acciones del Perfil */}
             <div className="shrink-0 self-start sm:self-end mt-2 sm:mt-0 flex items-center gap-2 w-full sm:w-auto">
               {isOwnProfile ? (
-                <Button variant="outline" size="sm" className="w-full sm:w-auto gap-1.5 font-medium hover:bg-accent/10" disabled>
+                <Link
+                  href="/perfil/editar"
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "w-full sm:w-auto gap-1.5 font-medium hover:bg-accent/10",
+                  )}
+                >
                   <Edit className="size-3.5" />
                   Editar perfil
-                </Button>
+                </Link>
               ) : (
                 <Button size="sm" className="w-full sm:w-auto gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-medium" disabled>
                   <Sprout className="size-3.5" />

@@ -13,11 +13,20 @@ Estos son los pasos que requieren tu intervención (cuentas externas, dinero, de
    - `postgis` (geolocalización del mapa)
    - `pgcrypto` (UUIDs — normalmente ya está)
 4. **Ejecutar la migración**: copia el contenido de `supabase/migrations/0001_init.sql` y pégalo en `SQL Editor → New query → Run`. Luego haz lo mismo con `supabase/seed.sql` para los datos de ejemplo. *(Nota: El archivo incluye un parche crítico de seguridad del `SecurityAgent` para evitar escalada de roles y el esquema del **Muro Social / Feed**).* Si ya aplicaste la migración inicial previamente, solo debes ejecutar la sección final de `0001_init.sql` dedicada al **SOCIAL FEED**.
-5. **Crear storage buckets**: en `Storage → New bucket`, crea:
-   - `avatars` (público)
+
+   **Actualización (subida de fotos avatar/foro/grow):** si ya aplicaste la
+   migración antes de esta versión, re-ejecuta el bloque final
+   "STORAGE — políticas de `avatars`, `forum-photos`, `grow-photos`" de
+   `0001_init.sql` (incluye también el `alter table forum_threads ... media_urls`,
+   que es idempotente). Si ves errores `policy already exists`, es que esa
+   política ya estaba — puedes ignorarlos.
+5. **Crear storage buckets**: en `Storage → New bucket`, crea (en todos, límite
+   de tamaño `5 MB` y MIME types `image/jpeg, image/png, image/webp, image/gif`):
+   - `avatars` (público — fotos de perfil)
    - `strain-photos` (público)
-   - `grow-photos` (privado — solo dueño)
-   - `forum-photos` (público)
+   - `grow-photos` (**privado** — fotos del diario de cultivo; se sirven con
+     signed URLs, solo las ve el dueño)
+   - `forum-photos` (público — fotos de los hilos del foro)
    - `social-photos` (público — fotos del Muro Social). Al crearlo, en las
      opciones del bucket activa **"Restrict file size"** = `5 MB` y en
      **"Allowed MIME types"** pon: `image/jpeg, image/png, image/webp, image/gif`.

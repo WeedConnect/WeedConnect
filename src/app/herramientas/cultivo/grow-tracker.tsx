@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Plus,
   Trash2,
@@ -15,7 +15,9 @@ import {
   Loader2,
   Database,
   Info,
-  ArrowRight
+  ArrowRight,
+  Image as ImageIcon,
+  X
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,8 +35,21 @@ import {
   addGrowEntry,
   deleteGrowEntry,
 } from "@/lib/grow";
+import { uploadImage, signImages, validateImageFile } from "@/lib/storage";
 
 const STORAGE_KEY = "wc_grow_logs";
+const GROW_BUCKET = "grow-photos";
+const MAX_ENTRY_PHOTOS = 4;
+
+interface SelectedFile {
+  file: File;
+  preview: string;
+}
+
+/** Recopila todos los paths de fotos de todas las entradas de los cultivos. */
+function collectPhotoPaths(logs: GrowLog[]): string[] {
+  return logs.flatMap((l) => l.entries.flatMap((e) => e.photos ?? []));
+}
 
 const STAGE_LABEL: Record<GrowStage, string> = {
   germination: "Germinación",
@@ -94,6 +109,10 @@ export function GrowTracker() {
   const [newEntryWaterMl, setNewEntryWaterMl] = useState("");
   const [newEntryPh, setNewEntryPh] = useState("");
   const [newEntryNutrients, setNewEntryNutrients] = useState("");
+  const [newEntryPhotos, setNewEntryPhotos] = useState<SelectedFile[]>([]);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function init() {
@@ -122,6 +141,11 @@ export function GrowTracker() {
           setLogs(cloudLogs);
           if (cloudLogs.length > 0) {
             setSelectedLog(cloudLogs[0].id);
+          }
+          // Firmar las URLs de las fotos (bucket privado)
+          const paths = collectPhotoPaths(cloudLogs);
+          if (paths.length > 0) {
+            setSignedUrls(await signImages(supabase, GROW_BUCKET, paths));
           }
         } else {
           // Cargar desde localStorage si es invitado
@@ -272,6 +296,14 @@ export function GrowTracker() {
           return { name: name ?? s, dosageMl: parseFloat(dosage ?? "0") || 0 };
         });
 
+      // Subir fotos al bucket privado (solo usuarios con sesión)
+      const photoPaths: string[] = [];
+      if (user && newEntryPhotos.length > 0) {
+        for (const { file } of newEntryPhotos) {
+          photoPaths.push(await uploadImage(supabase, GROW_BUCKET, user.id, file));
+        }
+      }
+
       const entryData: GrowLogEntry = {
         id: uid(),
         date: newEntryDate,
@@ -282,6 +314,7 @@ export function GrowTracker() {
             ? { amountMl: parseFloat(newEntryWaterMl), ph: newEntryPh ? parseFloat(newEntryPh) : undefined }
             : undefined,
         nutrients: nutrients.length > 0 ? nutrients : undefined,
+        photos: photoPaths,
       };
 
       if (user) {
@@ -292,6 +325,11 @@ export function GrowTracker() {
             : l,
         );
         setLogs(updated);
+        // Firmar las URLs de las fotos recién subidas
+        if (photoPaths.length > 0) {
+          const newSigned = await signImages(supabase, GROW_BUCKET, photoPaths);
+          setSignedUrls((prev) => ({ ...prev, ...newSigned }));
+        }
       } else {
         const updated = logs.map((l) =>
           l.id === selectedLog
@@ -307,6 +345,9 @@ export function GrowTracker() {
       setNewEntryWaterMl("");
       setNewEntryPh("");
       setNewEntryNutrients("");
+      newEntryPhotos.forEach((p) => URL.revokeObjectURL(p.preview));
+      setNewEntryPhotos([]);
+      setPhotoError(null);
     } catch (err) {
       console.error("[GrowTracker] Error al añadir entrada:", err);
     } finally {
@@ -336,6 +377,38 @@ export function GrowTracker() {
     } finally {
       setIsSaving(false);
     }
+  }
+
+  function handleEntryPhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    if (photoInputRef.current) photoInputRef.current.value = "";
+    if (files.length === 0) return;
+
+    const remaining = MAX_ENTRY_PHOTOS - newEntryPhotos.length;
+    if (files.length > remaining) {
+      setPhotoError(`Solo puedes adjuntar hasta ${MAX_ENTRY_PHOTOS} fotos por entrada.`);
+    }
+
+    const accepted: SelectedFile[] = [];
+    for (const file of files.slice(0, remaining)) {
+      const validationError = validateImageFile(file);
+      if (validationError) {
+        setPhotoError(validationError);
+        continue;
+      }
+      accepted.push({ file, preview: URL.createObjectURL(file) });
+    }
+    setNewEntryPhotos((prev) => [...prev, ...accepted]);
+  }
+
+  function removeEntryPhoto(index: number) {
+    setNewEntryPhotos((prev) => {
+      const updated = [...prev];
+      URL.revokeObjectURL(updated[index].preview);
+      updated.splice(index, 1);
+      return updated;
+    });
+    setPhotoError(null);
   }
 
   function toggleEntry(id: string) {
@@ -636,6 +709,69 @@ export function GrowTracker() {
                         disabled={isSaving}
                       />
                     </div>
+                    <div className="grid gap-1.5">
+                      <Label>Fotos (opcional)</Label>
+                      {user ? (
+                        <>
+                          {newEntryPhotos.length > 0 && (
+                            <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                              {newEntryPhotos.map((item, idx) => (
+                                <div
+                                  key={idx}
+                                  className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={item.preview}
+                                    alt="Vista previa"
+                                    className="h-full w-full object-cover"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeEntryPhoto(idx)}
+                                    disabled={isSaving}
+                                    className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-black/60 text-white"
+                                    aria-label="Quitar foto"
+                                  >
+                                    <X className="size-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            ref={photoInputRef}
+                            onChange={handleEntryPhotoChange}
+                            disabled={isSaving || newEntryPhotos.length >= MAX_ENTRY_PHOTOS}
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isSaving || newEntryPhotos.length >= MAX_ENTRY_PHOTOS}
+                            onClick={() => photoInputRef.current?.click()}
+                            className="w-fit gap-1.5"
+                          >
+                            <ImageIcon className="size-4" />
+                            Añadir fotos
+                          </Button>
+                          {photoError && (
+                            <p className="text-xs text-destructive">{photoError}</p>
+                          )}
+                          <p className="text-xs text-muted-foreground">
+                            Hasta {MAX_ENTRY_PHOTOS} imágenes · máx. 5 MB cada una. Privadas: solo tú puedes verlas.
+                          </p>
+                        </>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">
+                          Inicia sesión para adjuntar fotos privadas a tus entradas de cultivo.
+                        </p>
+                      )}
+                    </div>
                     <div className="flex gap-2 pt-1">
                       <Button onClick={addEntry} size="sm" disabled={isSaving}>
                         {isSaving ? (
@@ -747,6 +883,42 @@ export function GrowTracker() {
                                   <div className="text-sm flex flex-col gap-1 mt-1 bg-muted/30 p-2 rounded-md">
                                     <span className="font-medium text-xs text-muted-foreground">Notas:</span>{" "}
                                     <span className="text-foreground">{entry.notes}</span>
+                                  </div>
+                                )}
+                                {entry.photos && entry.photos.length > 0 && (
+                                  <div className="mt-3">
+                                    <span className="font-medium text-xs text-muted-foreground">
+                                      Fotos:
+                                    </span>
+                                    <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                      {entry.photos.map((path, idx) => {
+                                        const url = signedUrls[path];
+                                        return url ? (
+                                          <a
+                                            key={idx}
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="overflow-hidden rounded-lg border border-border bg-muted"
+                                          >
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                              src={url}
+                                              alt={`Foto ${idx + 1} de la entrada`}
+                                              loading="lazy"
+                                              className="aspect-square w-full object-cover transition-transform hover:scale-[1.03]"
+                                            />
+                                          </a>
+                                        ) : (
+                                          <div
+                                            key={idx}
+                                            className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-border bg-muted/40 text-muted-foreground"
+                                          >
+                                            <Loader2 className="size-4 animate-spin" />
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
                                 )}
                               </div>

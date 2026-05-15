@@ -68,6 +68,28 @@ export default async function ThreadPage({
         <div className="mt-4 rounded-lg bg-muted/30 px-5 py-5 text-base leading-relaxed whitespace-pre-wrap">
           {thread.body}
         </div>
+
+        {thread.media_urls?.length > 0 && (
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            {thread.media_urls.map((url, i) => (
+              <a
+                key={i}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="overflow-hidden rounded-lg border border-border bg-muted"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={`Adjunto ${i + 1} del hilo`}
+                  loading="lazy"
+                  className="max-h-[420px] w-full object-cover transition-transform hover:scale-[1.02]"
+                />
+              </a>
+            ))}
+          </div>
+        )}
       </article>
 
       {/* Respuestas */}

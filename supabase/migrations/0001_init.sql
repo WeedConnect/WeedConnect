@@ -134,6 +134,7 @@ create table public.forum_threads (
   slug         text not null,
   title        text not null,
   body         text not null,
+  media_urls   text[] not null default '{}',
   pinned       boolean not null default false,
   locked       boolean not null default false,
   view_count   integer not null default 0,
@@ -428,5 +429,74 @@ create policy "social-photos delete"
     bucket_id = 'social-photos'
     and auth.uid()::text = (storage.foldername(name))[1]
   );
+
+
+-- ============================================================================
+-- STORAGE — políticas de `avatars`, `forum-photos`, `grow-photos`
+-- ============================================================================
+-- Buckets a crear manualmente (ver TODO_USUARIO.md):
+--   avatars       → PÚBLICO
+--   forum-photos  → PÚBLICO
+--   grow-photos   → PRIVADO (las fotos se sirven con signed URLs)
+-- En todos, el patrón de carpeta es `<auth.uid()>/<archivo>`.
+
+-- avatars: lectura pública; subida/borrado solo del dueño.
+create policy "avatars read"
+  on storage.objects for select
+  using ( bucket_id = 'avatars' );
+create policy "avatars insert"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+create policy "avatars delete"
+  on storage.objects for delete
+  using (
+    bucket_id = 'avatars'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- forum-photos: lectura pública; subida/borrado solo del dueño.
+create policy "forum-photos read"
+  on storage.objects for select
+  using ( bucket_id = 'forum-photos' );
+create policy "forum-photos insert"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'forum-photos'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+create policy "forum-photos delete"
+  on storage.objects for delete
+  using (
+    bucket_id = 'forum-photos'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- grow-photos: PRIVADO — incluso la lectura está restringida al dueño.
+create policy "grow-photos read"
+  on storage.objects for select
+  using (
+    bucket_id = 'grow-photos'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+create policy "grow-photos insert"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'grow-photos'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+create policy "grow-photos delete"
+  on storage.objects for delete
+  using (
+    bucket_id = 'grow-photos'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- Columna de adjuntos para hilos del foro.
+-- Idempotente: segura aunque ya hayas aplicado la migración previamente.
+alter table public.forum_threads
+  add column if not exists media_urls text[] not null default '{}';
 
 
