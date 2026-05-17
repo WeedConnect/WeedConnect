@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Headphones, Clock, Mic, ExternalLink } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MOCK_EPISODIOS } from "@/data/podcast";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Podcast WeedConnect",

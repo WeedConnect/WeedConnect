@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Clock, ChefHat, Pizza, Award, ArrowUpRight, ExternalLink } from "lucide-react";
+import { Clock, ChefHat, Pizza, Award, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {

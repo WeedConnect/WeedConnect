@@ -111,15 +111,18 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   const [isCommenting, setIsCommenting] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
   // Sincronización Reactiva de Props
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     setLocalLiked(post.isLikedByUser || false);
     setLocalLikesCount(post.likesCount || 0);
     setLocalBookmarked(post.isBookmarkedByUser || false);
     setLocalComments(post.comments || []);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [post.isLikedByUser, post.likesCount, post.isBookmarkedByUser, post.comments]);
 
   if (isDeleted) return null; // Animaciones manejables via CSS si es necesario

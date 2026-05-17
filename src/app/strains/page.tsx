@@ -8,6 +8,11 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Catálogo de strains",
   description: "Explora variedades de cannabis: indica, sativa, híbridos. THC, CBD, efectos.",
+  openGraph: {
+    title: "Catálogo de strains · WeedConnect",
+    description: "Explora variedades de cannabis: indica, sativa, híbridos. THC, CBD, efectos.",
+    images: [{ url: `/api/og?title=${encodeURIComponent("Catálogo de strains")}&description=${encodeURIComponent("Indica, sativa, híbridos. THC, CBD, efectos y recomendaciones de la comunidad.")}`, width: 1200, height: 630 }],
+  },
 };
 
 export default async function StrainsPage() {

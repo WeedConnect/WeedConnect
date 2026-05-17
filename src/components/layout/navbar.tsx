@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, LogOut, User, Sprout } from "lucide-react";
+import { ChevronDown, LogOut, User as UserIcon, Sprout } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import { MAIN_NAV } from "@/lib/nav";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
@@ -22,8 +23,8 @@ import { Button } from "@/components/ui/button";
 export function Navbar() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [sessionUser, setSessionUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [sessionUser, setSessionUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<{ username?: string; display_name?: string; avatar_url?: string; points?: number } | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -71,6 +72,7 @@ export function Navbar() {
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSignOut = async () => {
@@ -167,7 +169,7 @@ export function Navbar() {
                 <DropdownMenuItem
                   render={
                     <Link href={`/perfil/${profile?.username || ""}`} className="flex items-center w-full gap-2">
-                      <User className="size-4 text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground" />
+                      <UserIcon className="size-4 text-muted-foreground group-focus/dropdown-menu-item:text-accent-foreground" />
                       Mi Perfil
                     </Link>
                   }

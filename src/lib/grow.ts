@@ -165,6 +165,25 @@ export async function addGrowEntry(
 }
 
 /**
+ * Actualiza campos editables de un cultivo (p. ej. finishedAt).
+ */
+export async function updateGrowLog(
+  supabase: SupabaseClient,
+  id: string,
+  updates: { finishedAt?: string | null },
+): Promise<void> {
+  const { error } = await supabase
+    .from("grow_logs")
+    .update({ finished_at: updates.finishedAt ? toDateString(updates.finishedAt) : null })
+    .eq("id", id);
+
+  if (error) {
+    console.error("[Grow API] Error updating grow log:", error);
+    throw error;
+  }
+}
+
+/**
  * Elimina una entrada específica del diario.
  */
 export async function deleteGrowEntry(supabase: SupabaseClient, entryId: string): Promise<void> {

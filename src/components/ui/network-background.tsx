@@ -12,7 +12,7 @@ interface NetworkBackgroundProps {
 export function NetworkBackground({
   density = 40,
   speed = 0.5,
-  interactive = false,
+  interactive: _interactive = false,
 }: NetworkBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { resolvedTheme } = useTheme();

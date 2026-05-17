@@ -146,8 +146,8 @@ export function CreatePostBox({ user }: CreatePostBoxProps) {
         } else {
           setError(result.error || "No se pudo publicar en el muro.");
         }
-      } catch (err: any) {
-        setError(err.message || "Error inesperado al publicar.");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Error inesperado al publicar.");
       }
     });
   };

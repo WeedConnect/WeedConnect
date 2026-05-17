@@ -116,9 +116,21 @@ Mínimos:
 - Disclaimer en cada página sensible: "Contenido informativo. El consumo de cannabis puede tener riesgos."
 - RGPD: opción de borrar cuenta y descargar datos.
 
-## 9. Analytics (cuando tengas tráfico)
+## 9. Analytics — Plausible (antes del lanzamiento)
 
-Recomendado: **Plausible** (https://plausible.io, ~9€/mes, sin cookies, RGPD-friendly) o **PostHog** (gratis hasta 1M eventos/mes).
+La integración ya está lista en el código — solo necesitas crear la cuenta y añadir el dominio.
+
+1. Crea cuenta en https://plausible.io (prueba gratuita 30 días, luego ~9€/mes).
+   - Alternativa gratuita: **PostHog** (https://posthog.com, 1M eventos/mes gratis).
+2. En Plausible: `Add Website` → pon el dominio exacto (ej: `weedconnect.app`).
+3. En tu `.env.local` añade:
+   ```
+   NEXT_PUBLIC_PLAUSIBLE_DOMAIN=weedconnect.app
+   ```
+4. En Vercel (`Settings → Environment Variables`) añade la misma variable.
+5. El script se carga automáticamente en producción — en local no carga si la variable está vacía.
+
+Ventajas de Plausible: sin cookies → sin banner de cookies obligatorio, RGPD compliant de serie.
 
 ## 10. Email transaccional (cuando haya auth real)
 

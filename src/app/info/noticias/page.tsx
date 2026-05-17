@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CalendarDays, ExternalLink } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

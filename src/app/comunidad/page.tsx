@@ -6,6 +6,11 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 export const metadata: Metadata = {
   title: "Comunidad",
   description: "Foro, eventos, blog, podcast, recetas y grupos temáticos.",
+  openGraph: {
+    title: "Comunidad · WeedConnect",
+    description: "Foro de cannabis, eventos, blog colaborativo, podcast, recetas y grupos temáticos.",
+    images: [{ url: `/api/og?title=${encodeURIComponent("Comunidad WeedConnect")}&description=${encodeURIComponent("Foro, eventos, blog colaborativo, podcast y grupos temáticos.")}`, width: 1200, height: 630 }],
+  },
 };
 
 const SECTIONS = [

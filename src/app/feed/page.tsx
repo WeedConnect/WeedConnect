@@ -10,6 +10,18 @@ import { SocialPost } from "@/types";
 
 export const dynamic = "force-dynamic";
 
+type RawAuthor = { id: string; username: string; display_name: string | null; avatar_url: string | null };
+type RawLike = { user_id: string };
+type RawComment = { id: string; content: string; created_at: string; author: RawAuthor | null };
+type RawBookmark = { user_id: string };
+type RawPost = {
+  id: string; author_id: string; content: string; created_at: string; media_urls: string[] | null;
+  author: RawAuthor | null;
+  social_likes: RawLike[] | null;
+  social_comments: RawComment[] | null;
+  social_bookmarks: RawBookmark[] | null;
+};
+
 export const metadata: Metadata = {
   title: "Muro Social — WeedConnect",
   description: "Comparte estados rápidos y conecta con la comunidad en tiempo real.",
@@ -38,7 +50,7 @@ export default async function FeedPage() {
           </h1>
           
           <p className="text-sm text-muted-foreground leading-relaxed mb-8">
-            El Muro Social es un espacio exclusivo para miembros verificados de WeedConnect. Inicia sesión para compartir micro-estados, dar "Me gusta" y conectar en tiempo real.
+            El Muro Social es un espacio exclusivo para miembros verificados de WeedConnect. Inicia sesión para compartir micro-estados, dar &ldquo;Me gusta&rdquo; y conectar en tiempo real.
           </p>
 
           <div className="flex flex-col w-full gap-3">
@@ -104,7 +116,7 @@ export default async function FeedPage() {
     .limit(30);
 
   // Mapeo dinámico compatible con el tipo SocialPost extendido
-  const posts: SocialPost[] = (rawPosts || []).map((p: any) => ({
+  const posts: SocialPost[] = ((rawPosts || []) as unknown as RawPost[]).map((p) => ({
     id: p.id,
     authorId: p.author_id,
     content: p.content,
@@ -113,14 +125,14 @@ export default async function FeedPage() {
     author: p.author ? {
       id: p.author.id,
       username: p.author.username,
-      displayName: p.author.display_name,
-      avatarUrl: p.author.avatar_url,
+      displayName: p.author.display_name ?? undefined,
+      avatarUrl: p.author.avatar_url ?? undefined,
     } : undefined,
     likesCount: p.social_likes?.length || 0,
-    isLikedByUser: p.social_likes?.some((l: any) => l.user_id === user.id) || false,
+    isLikedByUser: p.social_likes?.some((l) => l.user_id === user.id) || false,
     commentsCount: p.social_comments?.length || 0,
     comments: (p.social_comments || [])
-      .map((c: any) => ({
+      .map((c) => ({
         id: c.id,
         postId: p.id,
         authorId: c.author?.id || "",
@@ -129,13 +141,13 @@ export default async function FeedPage() {
         author: c.author ? {
           id: c.author.id,
           username: c.author.username,
-          displayName: c.author.display_name,
-          avatarUrl: c.author.avatar_url,
+          displayName: c.author.display_name ?? undefined,
+          avatarUrl: c.author.avatar_url ?? undefined,
         } : undefined,
       }))
-      .sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
     bookmarksCount: p.social_bookmarks?.length || 0,
-    isBookmarkedByUser: p.social_bookmarks?.some((b: any) => b.user_id === user.id) || false,
+    isBookmarkedByUser: p.social_bookmarks?.some((b) => b.user_id === user.id) || false,
   }));
 
   return (

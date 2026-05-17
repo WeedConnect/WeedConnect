@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUp, MessageSquare, PenSquare } from "lucide-react";
+import { MessageSquare, PenSquare } from "lucide-react";
+import { VoteButton } from "@/components/forum/vote-button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -8,7 +9,15 @@ import { getCategories, getThreads, relativeTime } from "@/lib/forum";
 import { createClient } from "@/lib/supabase/server";
 import { ForumCategoryTabs } from "@/components/forum/category-tabs";
 
-export const metadata: Metadata = { title: "Foro" };
+export const metadata: Metadata = {
+  title: "Foro",
+  description: "Debates, consejos y experiencias de la comunidad cannábica. Cultivo, legal, variedades, medicinal y más.",
+  openGraph: {
+    title: "Foro · WeedConnect",
+    description: "Debates y experiencias de la comunidad cannábica. Cultivo, legalidad, variedades, medicinal.",
+    images: [{ url: `/api/og?title=${encodeURIComponent("Foro WeedConnect")}&description=${encodeURIComponent("Debates y experiencias de la comunidad. Cultivo, legalidad, variedades y medicinal.")}`, width: 1200, height: 630 }],
+  },
+};
 
 export default async function ForoPage({
   searchParams,
@@ -65,15 +74,23 @@ export default async function ForoPage({
       ) : (
         <ul className="divide-y divide-border rounded-lg border border-border">
           {threads.map((t) => (
-            <li key={t.id}>
+            <li key={t.id} className="flex items-start gap-3 px-4 py-4 transition-colors hover:bg-muted/50">
+              {/* Votos — fuera del <Link> para no interferir con la navegación */}
+              <div className="shrink-0 pt-0.5" onClick={(e) => e.stopPropagation()}>
+                <VoteButton
+                  target="thread"
+                  targetId={t.id}
+                  isAuthenticated={!!user}
+                  orientation="vertical"
+                  revalidatePath="/comunidad/foro"
+                />
+              </div>
+
+              {/* Contenido clickable → navega al hilo */}
               <Link
                 href={`/comunidad/foro/${t.slug}`}
-                className="flex gap-4 px-4 py-4 transition-colors hover:bg-muted/50"
+                className="flex min-w-0 flex-1 items-start gap-4"
               >
-                <div className="flex w-12 shrink-0 flex-col items-center pt-1 text-xs text-muted-foreground">
-                  <ArrowUp className="size-4" />
-                  <span className="font-semibold text-foreground">0</span>
-                </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge variant="secondary" className="text-[10px]">

@@ -137,7 +137,7 @@ export function AsistenteChat({ available }: { available: boolean }) {
         {messages.map((msg) => {
           const textParts = msg.parts.filter((p) => p.type === "text") as { text: string }[];
           const textContent = textParts.map((p) => p.text).join("");
-          const toolParts = msg.parts.filter((p) => p.type.startsWith("tool-")) as any[];
+          const toolParts = msg.parts.filter((p) => p.type.startsWith("tool-")) as { type: string; [key: string]: unknown }[];
 
           return (
             <div
@@ -196,7 +196,7 @@ export function AsistenteChat({ available }: { available: boolean }) {
                           if (state === "output-available") {
                             return (
                               <div
-                                key={toolCallId}
+                                key={toolCallId as string}
                                 className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400"
                               >
                                 <Check className="size-3" />
@@ -207,7 +207,7 @@ export function AsistenteChat({ available }: { available: boolean }) {
 
                           return (
                             <div
-                              key={toolCallId}
+                              key={toolCallId as string}
                               className="flex items-center gap-1 text-xs text-muted-foreground animate-pulse"
                             >
                               <Loader2 className="size-3 animate-spin" />

@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { getThread, getThreadPosts, relativeTime } from "@/lib/forum";
 import { createClient } from "@/lib/supabase/server";
 import { ReplyForm } from "@/components/forum/reply-form";
+import { VoteButton } from "@/components/forum/vote-button";
 
 export const dynamic = "force-dynamic";
 
@@ -47,26 +48,40 @@ export default async function ThreadPage({
       </Link>
 
       <article className="mt-6">
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <Badge variant="secondary">{thread.forum_categories?.name}</Badge>
-          {thread.pinned && (
-            <Badge variant="outline" className="text-[10px] text-emerald-600">
-              Fijado
-            </Badge>
-          )}
-          {thread.locked && (
-            <Badge variant="outline" className="text-[10px] text-amber-600">
-              Cerrado
-            </Badge>
-          )}
-          <span>por @{thread.profiles?.username ?? "anónimo"}</span>
-          <span>· {relativeTime(thread.created_at)}</span>
-        </div>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-          {thread.title}
-        </h1>
-        <div className="mt-4 rounded-lg bg-muted/30 px-5 py-5 text-base leading-relaxed whitespace-pre-wrap">
-          {thread.body}
+        <div className="flex gap-4">
+          {/* Votos del hilo */}
+          <div className="pt-1 shrink-0">
+            <VoteButton
+              target="thread"
+              targetId={thread.id}
+              isAuthenticated={!!user}
+              revalidatePath={`/comunidad/foro/${thread.slug}`}
+            />
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <Badge variant="secondary">{thread.forum_categories?.name}</Badge>
+              {thread.pinned && (
+                <Badge variant="outline" className="text-[10px] text-emerald-600">
+                  Fijado
+                </Badge>
+              )}
+              {thread.locked && (
+                <Badge variant="outline" className="text-[10px] text-amber-600">
+                  Cerrado
+                </Badge>
+              )}
+              <span>por @{thread.profiles?.username ?? "anónimo"}</span>
+              <span>· {relativeTime(thread.created_at)}</span>
+            </div>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+              {thread.title}
+            </h1>
+            <div className="mt-4 rounded-lg bg-muted/30 px-5 py-5 text-base leading-relaxed whitespace-pre-wrap">
+              {thread.body}
+            </div>
+          </div>
         </div>
 
         {thread.media_urls?.length > 0 && (
@@ -101,20 +116,33 @@ export default async function ThreadPage({
           {posts.map((post) => (
             <div
               key={post.id}
-              className="rounded-lg border border-border bg-card px-5 py-4"
+              className="flex gap-3 rounded-lg border border-border bg-card px-4 py-4"
             >
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Avatar className="size-6">
-                  <AvatarFallback className="text-[10px]">
-                    {(post.profiles?.username ?? "?").slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="font-medium text-foreground">
-                  @{post.profiles?.username ?? "anónimo"}
-                </span>
-                <span>· {relativeTime(post.created_at)}</span>
+              {/* Votos de la respuesta */}
+              <div className="shrink-0 pt-1">
+                <VoteButton
+                  target="post"
+                  targetId={post.id}
+                  isAuthenticated={!!user}
+                  orientation="vertical"
+                  revalidatePath={`/comunidad/foro/${thread.slug}`}
+                />
               </div>
-              <p className="mt-3 leading-relaxed whitespace-pre-wrap">{post.body}</p>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Avatar className="size-6">
+                    <AvatarFallback className="text-[10px]">
+                      {(post.profiles?.username ?? "?").slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium text-foreground">
+                    @{post.profiles?.username ?? "anónimo"}
+                  </span>
+                  <span>· {relativeTime(post.created_at)}</span>
+                </div>
+                <p className="mt-3 leading-relaxed whitespace-pre-wrap">{post.body}</p>
+              </div>
             </div>
           ))}
         </div>

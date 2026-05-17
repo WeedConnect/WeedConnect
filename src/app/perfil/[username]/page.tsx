@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { 
-  CalendarDays, 
-  Award, 
-  MessageSquare, 
-  Edit, 
+import {
+  CalendarDays,
+  Award,
+  MessageSquare,
+  Edit,
   Leaf,
   Sprout,
-  MapPin,
   Clock
 } from "lucide-react";
+import { UserLevel } from "@/components/gamification/user-level";
+import { Achievements } from "@/components/gamification/achievements";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -177,20 +178,20 @@ export default async function PerfilPage({ params }: PageProps) {
               </p>
             </div>
 
-            {/* Tarjetas de Logro */}
+            {/* Nivel y progreso */}
             <div className="space-y-3 flex flex-col">
-              <h3 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">Logros</h3>
-              <div className="flex-1 glass-panel rounded-2xl p-4 flex flex-col justify-center items-center text-center space-y-2 border-emerald-200/20 dark:border-brand-gold/10 bg-gradient-to-br from-muted/10 to-accent/5">
-                <div className="p-3 bg-accent/40 rounded-full text-brand-gold-dark dark:text-brand-gold shadow-inner">
-                  <Award className="size-7" />
+              <h3 className="text-sm font-semibold tracking-wider text-muted-foreground uppercase">Nivel</h3>
+              <div className="flex-1 glass-panel rounded-2xl p-4 flex flex-col justify-center space-y-4 border-emerald-200/20 dark:border-brand-gold/10 bg-gradient-to-br from-muted/10 to-accent/5">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 bg-accent/40 rounded-full text-brand-gold-dark dark:text-brand-gold shadow-inner shrink-0">
+                    <Award className="size-6" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-extrabold text-foreground tracking-tight">{profile.points}</div>
+                    <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Puntos WeedConnect</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-2xl font-extrabold text-foreground tracking-tight">{profile.points}</div>
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Puntos WeedConnect</div>
-                </div>
-                <p className="text-[10px] text-muted-foreground leading-tight">
-                  ¡Gana puntos participando en el foro, subiendo logs de cultivo y completando retos!
-                </p>
+                <UserLevel points={profile.points} />
               </div>
             </div>
           </div>
@@ -198,6 +199,18 @@ export default async function PerfilPage({ params }: PageProps) {
 
         {/* Secciones de Contenido del Usuario */}
         <div className="mt-8 space-y-6">
+
+          {/* Logros / Gamificación */}
+          <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden shadow-sm">
+            <CardContent className="p-6">
+              <Achievements
+                points={profile.points}
+                threadCount={threads?.length ?? 0}
+                hasAvatar={!!profile.avatar_url}
+              />
+            </CardContent>
+          </Card>
+
           <Card className="border-border/40 bg-card/50 backdrop-blur-sm overflow-hidden shadow-sm">
             <CardHeader className="pb-3 border-b border-border/40">
               <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
@@ -228,7 +241,7 @@ export default async function PerfilPage({ params }: PageProps) {
                           </h4>
                           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                             <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-medium capitalize">
-                              {(t.forum_categories as any)?.name || "General"}
+                              {(t.forum_categories as { name?: string } | null)?.name || "General"}
                             </Badge>
                             <span>•</span>
                             <span>Publicado {relativeTime(t.created_at)}</span>

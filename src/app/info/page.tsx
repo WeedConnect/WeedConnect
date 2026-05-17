@@ -6,6 +6,11 @@ import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/ca
 export const metadata: Metadata = {
   title: "Información",
   description: "Educación, legalidad, noticias y recomendaciones culturales.",
+  openGraph: {
+    title: "Información · WeedConnect",
+    description: "Guías educativas, marco legal por CCAA, noticias del sector y recomendaciones culturales.",
+    images: [{ url: `/api/og?title=${encodeURIComponent("Información Cannabis")}&description=${encodeURIComponent("Educación, marco legal, noticias del sector y cultura cannábica.")}`, width: 1200, height: 630 }],
+  },
 };
 
 const SECTIONS = [

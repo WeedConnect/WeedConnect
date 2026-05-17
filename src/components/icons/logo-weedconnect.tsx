@@ -10,7 +10,7 @@ interface LogoProps extends React.SVGProps<SVGSVGElement> {
 export function LogoWeedConnect({
   className,
   showText = false,
-  textClassName,
+  textClassName: _textClassName,
   ...props
 }: LogoProps) {
   // Coordinates for nodes

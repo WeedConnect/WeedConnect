@@ -4,6 +4,7 @@ import {
   mapPostsToThreads,
   mapThreadsToCategories,
   filterThreads,
+  type SortableThread,
 } from "./forum";
 
 // Mockeo de los datos del foro (src/data/forum-mock.ts) solicitado por el usuario
@@ -60,7 +61,7 @@ describe("Lógica de negocio y utilidades del Foro (src/lib/forum.ts)", () => {
   
   describe("1) Ordenación de hilos (sortThreads)", () => {
     it("debe priorizar correctamente los hilos fijados (pinned) sobre los demás", () => {
-      const sorted = sortThreads(MOCK_THREADS as any);
+      const sorted = sortThreads(MOCK_THREADS as SortableThread[]);
       
       // El primer elemento debe ser 't2' porque es el único con pinned: true
       expect(sorted[0].id).toBe("t2");
@@ -79,7 +80,7 @@ describe("Lógica de negocio y utilidades del Foro (src/lib/forum.ts)", () => {
     });
 
     it("debe ordenar por recuento de votos (mayor a menor) si pinned y position coinciden", () => {
-      const sorted = sortThreads(MOCK_THREADS as any);
+      const sorted = sortThreads(MOCK_THREADS as SortableThread[]);
       const unpinnedThreads = sorted.filter((t) => !t.pinned);
       
       // t3 tiene 25 votos y t1 tiene 10 votos. Ambos tienen position: 2 y pinned: false

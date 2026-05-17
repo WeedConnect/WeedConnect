@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: "Mapa Colaborativo WeedConnect",
   description:
     "Encuentra asociaciones legales y los mejores sitios (spots) chill para relajarte: miradores, parques y zonas con vistas. Datos de la comunidad.",
+  openGraph: {
+    title: "Mapa Colaborativo · WeedConnect",
+    description: "Asociaciones cannábicas, miradores, parques y spots chill. Datos colaborativos de la comunidad.",
+    images: [{ url: `/api/og?title=${encodeURIComponent("Mapa Colaborativo")}&description=${encodeURIComponent("Asociaciones cannábicas, spots chill y miradores. Datos de la comunidad.")}`, width: 1200, height: 630 }],
+  },
 };
 
 export default async function MapaPage() {

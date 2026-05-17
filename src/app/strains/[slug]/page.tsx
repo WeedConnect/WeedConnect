@@ -31,9 +31,22 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const strain = await getStrainBySlug(slug);
-  return strain
-    ? { title: strain.name, description: strain.description }
-    : { title: "Strain no encontrada" };
+  if (!strain) return { title: "Strain no encontrada" };
+  return {
+    title: strain.name,
+    description: strain.description,
+    openGraph: {
+      title: `${strain.name} · WeedConnect`,
+      description: strain.description,
+      images: [
+        {
+          url: `/api/og?title=${encodeURIComponent(strain.name)}&description=${encodeURIComponent(strain.description)}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+  };
 }
 
 export default async function StrainPage({

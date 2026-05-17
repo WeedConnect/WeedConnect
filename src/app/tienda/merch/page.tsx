@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ShoppingBag, Package, Tag, Info } from "lucide-react";
+import { ShoppingBag, Tag, Info } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -16,8 +16,6 @@ const MOCK_PRODUCTOS = [
   { id: "5", nombre: "Pack semillas artesanales", precio: 19.99, categoria: "semillas", emoji: "🌱", disponible: false },
   { id: "6", nombre: "Grinder de aluminio WC", precio: 34.99, categoria: "accesorios", emoji: "⚙️", disponible: false },
 ];
-
-const CATEGORIAS = ["ropa", "accesorios", "semillas"];
 
 export default function MerchPage() {
   return (

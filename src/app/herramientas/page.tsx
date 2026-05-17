@@ -8,6 +8,11 @@ export const metadata: Metadata = {
   title: "Herramientas",
   description:
     "Calculadora de dosis, seguimiento de cultivo, asistente IA y catálogo de strains.",
+  openGraph: {
+    title: "Herramientas · WeedConnect",
+    description: "Calculadora de dosis para comestibles, diario de cultivo y asistente IA especializado.",
+    images: [{ url: `/api/og?title=${encodeURIComponent("Herramientas WeedConnect")}&description=${encodeURIComponent("Calculadora de dosis, grow tracker y asistente IA cannábico.")}`, width: 1200, height: 630 }],
+  },
 };
 
 const TOOLS = [

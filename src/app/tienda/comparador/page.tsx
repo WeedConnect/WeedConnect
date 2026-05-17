@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { ShoppingCart, Star, ShieldCheck, ArrowUpRight, Tag, Sparkles, Lightbulb, Zap, Box } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Compras Recomendadas WeedConnect — Setup & Parafernalia",

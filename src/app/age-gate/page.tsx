@@ -6,7 +6,6 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { Suspense } from "react";
-import { LogoWeedConnect } from "@/components/icons/logo-weedconnect";
 import { NetworkBackground } from "@/components/ui/network-background";
 
 const COOKIE = "wc_age_ok";

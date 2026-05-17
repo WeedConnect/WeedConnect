@@ -17,7 +17,10 @@ import {
   Info,
   ArrowRight,
   Image as ImageIcon,
-  X
+  X,
+  Flag,
+  RotateCcw,
+  Download,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,10 +35,12 @@ import {
   fetchGrowLogs,
   createGrowLog,
   deleteGrowLog,
+  updateGrowLog,
   addGrowEntry,
   deleteGrowEntry,
 } from "@/lib/grow";
 import { uploadImage, signImages, validateImageFile } from "@/lib/storage";
+import { GrowSummary } from "@/components/grow/grow-summary";
 
 const STORAGE_KEY = "wc_grow_logs";
 const GROW_BUCKET = "grow-photos";
@@ -280,6 +285,37 @@ export function GrowTracker() {
     } finally {
       setIsSaving(false);
     }
+  }
+
+  async function toggleFinishLog(log: GrowLog) {
+    const isFinished = !!log.finishedAt;
+    const finishedAt = isFinished ? null : new Date().toISOString().slice(0, 10);
+
+    if (user) {
+      try {
+        await updateGrowLog(supabase, log.id, { finishedAt });
+      } catch (err) {
+        console.error("[GrowTracker] Error actualizando cultivo:", err);
+        return;
+      }
+    }
+
+    const updated = logs.map((l) =>
+      l.id === log.id ? { ...l, finishedAt: finishedAt ?? undefined } : l,
+    );
+    setLogs(updated);
+    if (!user) localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  }
+
+  function exportLog(log: GrowLog) {
+    const json = JSON.stringify(log, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cultivo-${log.name.replace(/\s+/g, "-").toLowerCase()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function addEntry() {
@@ -609,22 +645,60 @@ export function GrowTracker() {
           {/* Detalle del log seleccionado */}
           {activeLog ? (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between gap-4">
+              {/* Cabecera del cultivo activo */}
+              <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="overflow-hidden">
                   <h2 className="text-xl font-semibold truncate">{activeLog.name}</h2>
                   {activeLog.strainId && (
                     <p className="text-sm text-muted-foreground truncate">{activeLog.strainId}</p>
                   )}
                 </div>
-                <Button
-                  size="sm"
-                  onClick={() => setShowNewEntry((v) => !v)}
-                  disabled={isSaving}
-                  className="shrink-0 gap-1.5"
-                >
-                  <Plus className="size-4" />
-                  Añadir entrada
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => exportLog(activeLog)}
+                    className="gap-1.5 text-muted-foreground"
+                    title="Exportar datos del cultivo"
+                  >
+                    <Download className="size-3.5" />
+                    Exportar
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={activeLog.finishedAt ? "outline" : "outline"}
+                    onClick={() => toggleFinishLog(activeLog)}
+                    disabled={isSaving}
+                    className={cn(
+                      "gap-1.5",
+                      activeLog.finishedAt
+                        ? "text-muted-foreground"
+                        : "border-amber-300 text-amber-600 hover:bg-amber-50 dark:border-amber-800 dark:text-amber-400 dark:hover:bg-amber-950/30",
+                    )}
+                  >
+                    {activeLog.finishedAt ? (
+                      <><RotateCcw className="size-3.5" />Reabrir</>
+                    ) : (
+                      <><Flag className="size-3.5" />Finalizar</>
+                    )}
+                  </Button>
+                  {!activeLog.finishedAt && (
+                    <Button
+                      size="sm"
+                      onClick={() => setShowNewEntry((v) => !v)}
+                      disabled={isSaving}
+                      className="gap-1.5"
+                    >
+                      <Plus className="size-4" />
+                      Añadir entrada
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Panel de resumen y progreso */}
+              <div className="rounded-xl border border-border bg-muted/20 p-4">
+                <GrowSummary log={activeLog} />
               </div>
 
               {showNewEntry && (
