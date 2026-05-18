@@ -24,7 +24,7 @@ export type ForumThread = {
   created_at: string;
   pinned: boolean;
   locked: boolean;
-  profiles: { username: string; points: number } | null;
+  profiles: { username: string; points?: number } | null;
   forum_categories: { name: string; slug: string } | null;
   reply_count: number;
   // Campos opcionales presentes en datos demo; ausentes en resultados de Supabase
@@ -37,7 +37,7 @@ export type ForumPost = {
   id: string;
   body: string;
   created_at: string;
-  profiles: { username: string; points: number } | null;
+  profiles: { username: string; points?: number } | null;
 };
 
 // ─── Tiempo relativo y estilos: ver forum-utils.ts ───────────────────────────
