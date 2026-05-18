@@ -1,5 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { MOCK_CATEGORIES, FORUM_MOCK_THREADS } from "@/data/forum-mock";
+import { MOCK_CATEGORIES, FORUM_MOCK_THREADS, MOCK_POSTS } from "@/data/forum-mock";
+
+// Re-exportar utilidades seguras en cliente desde forum-utils
+export { relativeTime, getCategoryStyle, CATEGORY_STYLES } from "@/lib/forum-utils";
+
+// Re-exportar mock data para uso en server components
+export { FORUM_MOCK_THREADS } from "@/data/forum-mock";
 
 export type ForumCategory = {
   id: string;
@@ -18,29 +24,25 @@ export type ForumThread = {
   created_at: string;
   pinned: boolean;
   locked: boolean;
-  profiles: { username: string; points: number } | null;
+  profiles: { username: string; points?: number } | null;
   forum_categories: { name: string; slug: string } | null;
   reply_count: number;
+  // Campos opcionales presentes en datos demo; ausentes en resultados de Supabase
+  upvotes?: number;
+  tags?: string[];
+  is_demo?: boolean;
 };
 
 export type ForumPost = {
   id: string;
   body: string;
   created_at: string;
-  profiles: { username: string; points: number } | null;
+  profiles: { username: string; points?: number } | null;
 };
 
-export function relativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "ahora mismo";
-  if (m < 60) return `hace ${m} min`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `hace ${h}h`;
-  const d = Math.floor(h / 24);
-  if (d < 30) return `hace ${d}d`;
-  return new Date(dateStr).toLocaleDateString("es-ES");
-}
+// ─── Tiempo relativo y estilos: ver forum-utils.ts ───────────────────────────
+
+// ─── Queries Supabase con fallback demo ───────────────────────────────────────
 
 export async function getCategories(): Promise<ForumCategory[]> {
   const supabase = await createClient();
@@ -76,9 +78,14 @@ export async function getThreads(categorySlug?: string): Promise<ForumThread[]> 
   if (categoryId) query = query.eq("category_id", categoryId);
 
   const { data: threads } = await query;
-  if (!threads?.length) return [];
+  if (!threads?.length) {
+    // Fallback a datos demo filtrando por categoría si se indica
+    const mock = FORUM_MOCK_THREADS as ForumThread[];
+    if (categorySlug) return mock.filter((t) => t.forum_categories?.slug === categorySlug);
+    return mock;
+  }
 
-  // Batch reply counts en una sola query
+  // Batch reply counts
   const ids = (threads as { id: string }[]).map((t) => t.id);
   const { data: posts } = await supabase
     .from("forum_posts")
@@ -91,11 +98,10 @@ export async function getThreads(categorySlug?: string): Promise<ForumThread[]> 
     counts[pid] = (counts[pid] ?? 0) + 1;
   }
 
-  const result = (threads as unknown as ForumThread[]).map((t) => ({
+  return (threads as unknown as ForumThread[]).map((t) => ({
     ...t,
     reply_count: counts[t.id] ?? 0,
   }));
-  return result.length > 0 ? result : (FORUM_MOCK_THREADS as ForumThread[]);
 }
 
 export async function getThread(slug: string): Promise<ForumThread | null> {
@@ -118,10 +124,15 @@ export async function getThreadPosts(threadId: string): Promise<ForumPost[]> {
     .select("id, body, created_at, profiles!author_id(username, points)")
     .eq("thread_id", threadId)
     .order("created_at");
-  return (data as unknown as ForumPost[]) ?? [];
+
+  const result = (data as unknown as ForumPost[]) ?? [];
+  if (result.length > 0) return result;
+
+  // Fallback: comentarios demo por thread id
+  return MOCK_POSTS[threadId] ?? [];
 }
 
-// --- Moderación de contenido ---
+// ─── Moderación de contenido ──────────────────────────────────────────────────
 
 const BLOCKED_PATTERNS = [
   /\bvend[oa]\b/i,
@@ -137,14 +148,20 @@ const BLOCKED_PATTERNS = [
   /\bcamello\b/i,
   /\bpillar\b/i,
   /\bgramo[s]?\b/i,
-  /\benvío\b/i,
-  /\benvio\b/i,
+  /\benvío[s]?\b/i,
+  /\benvio[s]?\b/i,
   /\bquien tiene\b/i,
   /\bquién tiene\b/i,
   /\bdonde comprar\b/i,
   /\bdónde comprar\b/i,
-  /\bme pasa\b/i,
-  /\bme pasas\b/i,
+  /\bme pasa[s]?\b/i,
+  /\bpásame\b/i,
+  /\bpasame\b/i,
+  /\btienes algo\b/i,
+  /\bmen[uú]\b/i,
+  /\bstock\b/i,
+  /\benvíos\b/i,
+  /\benvios\b/i,
 ];
 
 export const MODERATION_BLOCK_MESSAGE =
@@ -159,7 +176,7 @@ export function moderateContent(text: string): { blocked: boolean; message?: str
   return { blocked: false };
 }
 
-// --- Pure Business Logic Utilities ---
+// ─── Utilidades de negocio ────────────────────────────────────────────────────
 
 export type SortableThread = {
   pinned?: boolean;
@@ -168,38 +185,21 @@ export type SortableThread = {
   created_at: string;
 };
 
-/**
- * Sorts threads based on multiple criteria:
- * 1. Pinned threads first.
- * 2. Category position weight (lower number = higher priority).
- * 3. Votes count (higher votes = higher priority).
- * 4. Date recency (newer threads = higher priority).
- */
 export function sortThreads<T extends SortableThread>(threads: T[]): T[] {
   return [...threads].sort((a, b) => {
-    // 1. Pinned
     const aPinned = a.pinned ? 1 : 0;
     const bPinned = b.pinned ? 1 : 0;
     if (aPinned !== bPinned) return bPinned - aPinned;
-
-    // 2. Category position (lower is higher priority)
     const aPos = a.category_position ?? 9999;
     const bPos = b.category_position ?? 9999;
     if (aPos !== bPos) return aPos - bPos;
-
-    // 3. Votes (higher votes first)
     const aVotes = a.votes ?? 0;
     const bVotes = b.votes ?? 0;
     if (aVotes !== bVotes) return bVotes - aVotes;
-
-    // 4. Date Recency
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 }
 
-/**
- * Maps responses (posts) correctly to their respective threads.
- */
 export function mapPostsToThreads<T extends { id: string }, P extends { thread_id: string }>(
   threads: T[],
   posts: P[]
@@ -210,9 +210,6 @@ export function mapPostsToThreads<T extends { id: string }, P extends { thread_i
   }));
 }
 
-/**
- * Maps threads to their corresponding categories.
- */
 export function mapThreadsToCategories<C extends { id: string }, T extends { category_id: string }>(
   categories: C[],
   threads: T[]
@@ -223,20 +220,13 @@ export function mapThreadsToCategories<C extends { id: string }, T extends { cat
   }));
 }
 
-/**
- * Filters threads accurately based on category ID and/or tags.
- */
 export function filterThreads<T extends { category_id?: string; tags?: string[] }>(
   threads: T[],
   filters: { categoryId?: string; tag?: string }
 ): T[] {
   return threads.filter((t) => {
-    if (filters.categoryId && t.category_id !== filters.categoryId) {
-      return false;
-    }
-    if (filters.tag && (!t.tags || !t.tags.includes(filters.tag))) {
-      return false;
-    }
+    if (filters.categoryId && t.category_id !== filters.categoryId) return false;
+    if (filters.tag && (!t.tags || !t.tags.includes(filters.tag))) return false;
     return true;
   });
 }
