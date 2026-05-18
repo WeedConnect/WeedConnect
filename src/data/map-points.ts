@@ -13,8 +13,9 @@
  */
 
 import type { MapLocation } from "@/types";
+import { generateMapLocations } from "./map-generator";
 
-export const MAP_LOCATIONS: MapLocation[] = [
+const CURATED: MapLocation[] = [
   // ─── DISPENSARIOS — ESTADOS UNIDOS ─────────────────────────────────────────
 
   {
@@ -747,6 +748,9 @@ export const MAP_LOCATIONS: MapLocation[] = [
     updatedAt: "2026-05-01T00:00:00Z",
   },
 ];
+
+// Curated (36) + generated (520) = 556 total
+export const MAP_LOCATIONS: MapLocation[] = [...CURATED, ...generateMapLocations()];
 
 export function findMapLocation(slug: string): MapLocation | undefined {
   return MAP_LOCATIONS.find((l) => l.slug === slug);
