@@ -89,6 +89,64 @@ export interface SocialComment {
   };
 }
 
+// ─── Map types ────────────────────────────────────────────────────────────────
+
+export type MapCategory =
+  | "dispensary"      // Dispensarios legales (principalmente USA)
+  | "association"     // Asociaciones cannábicas (Europa)
+  | "cannabis_club"   // Clubes cannábicos privados (España/EU)
+  | "cbd_shop"        // Tiendas CBD / wellness
+  | "chill_spot"      // Miradores, parques, zonas chill
+  | "food"            // Munchies y comida
+  | "nightlife"       // Bares, ocio nocturno
+  | "point_of_interest"; // POI genérico
+
+export type LocationStatus =
+  | "negocio_publico"     // Negocio público/licenciado
+  | "info_orientativa"    // Información orientativa
+  | "verificar_normativa"; // Verificar normativa local
+
+export type LocationContinent =
+  | "europe"
+  | "north_america"
+  | "south_america"
+  | "asia"
+  | "oceania"
+  | "africa";
+
+export interface MapLocation {
+  id: string;
+  name: string;
+  slug: string;
+  category: MapCategory;
+  city: string;
+  country: string;
+  region?: string;
+  continent?: LocationContinent;
+  lat: number;
+  lng: number;
+  rating: number;           // 1-5
+  reviewCount: number;
+  tags: string[];
+  description: string;
+  status: LocationStatus;
+  verified: boolean;
+  isDemo?: boolean;         // true = dato generado para demo, no real
+  source?: string;          // "demo" | "community" | "google_places" | "foursquare" | "official"
+  sourceId?: string;        // ID en el proveedor externo (futuro)
+  websiteUrl?: string;
+  image?: string;
+  address?: string;
+  openingHours?: string;
+  subcategory?: string;
+  legalNotice?: string;
+  licenseNote?: string;
+  confidenceScore?: number; // 0-1, confianza en la validez del dato
+  updatedAt?: string;
+}
+
+// ─── Social ───────────────────────────────────────────────────────────────────
+
 export interface SocialPost {
   id: ID;
   authorId: ID;
