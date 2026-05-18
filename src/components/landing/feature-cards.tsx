@@ -91,10 +91,10 @@ export function FeatureCards() {
 
       <div className="mb-12 text-center relative z-10">
         <h2 className="text-3xl font-black tracking-tight sm:text-4xl text-brand-green dark:text-foreground">
-          Todo lo que necesitas
+          ¿Qué puedes hacer aquí?
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm sm:text-base text-muted-foreground font-medium">
-          Funcionalidades pensadas para la comunidad, los cultivadores y los apasionados de la tecnología cannábica.
+          Todo lo que necesita la comunidad cannábica: desde encontrar spots hasta elegir película para esta noche.
         </p>
       </div>
 

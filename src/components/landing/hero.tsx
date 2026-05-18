@@ -26,8 +26,12 @@ export function Hero() {
           Mapa, comunidad, pelis, munchies, juegos y cultura cannábica en un solo lugar.
         </p>
 
+        <p className="max-w-xl text-pretty text-sm sm:text-base text-muted-foreground/70 leading-relaxed">
+          Descubre spots, planes, películas, comida, tips y contenido útil con una comunidad enfocada en cultura, entretenimiento y consumo responsable.
+        </p>
+
         <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/60 dark:bg-emerald-950/20 px-3.5 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-          Sin compraventa · Sin contactos · Solo cultura, información y comunidad
+          Sin compraventa · Sin contactos · Sin precios · Sin intermediación
         </div>
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row w-full sm:w-auto justify-center px-4 sm:px-0">
