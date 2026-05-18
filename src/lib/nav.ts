@@ -10,6 +10,7 @@ export const MAIN_NAV: NavItem[] = [
       { href: "/feed", label: "Muro Social" },
       { href: "/comunidad/chat", label: "Chat en vivo" },
       { href: "/comunidad/foro", label: "Foro" },
+      { href: "/comunidad/ranking", label: "Ranking", description: "Top cultivadores por puntos" },
       { href: "/comunidad/eventos", label: "Eventos y ferias" },
       { href: "/comunidad/blog", label: "Blog" },
       { href: "/comunidad/podcast", label: "Podcast" },
@@ -19,7 +20,14 @@ export const MAIN_NAV: NavItem[] = [
     ],
   },
   { href: "/mapa", label: "Mapa" },
-  { href: "/strains", label: "Strains" },
+  {
+    href: "/strains",
+    label: "Strains",
+    children: [
+      { href: "/strains", label: "Catálogo", description: "Todas las variedades" },
+      { href: "/strains/comparar", label: "Comparador", description: "Compara hasta 3 strains" },
+    ],
+  },
   {
     href: "/herramientas",
     label: "Herramientas",

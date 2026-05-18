@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -74,6 +75,11 @@ export function LoginForm() {
       <Button type="submit" disabled={loading}>
         {loading ? "Entrando…" : "Entrar"}
       </Button>
+      <p className="text-center text-xs text-muted-foreground">
+        <Link href="/auth/recuperar" className="hover:text-foreground underline underline-offset-4">
+          ¿Olvidaste tu contraseña?
+        </Link>
+      </p>
     </form>
   );
 }

@@ -63,6 +63,8 @@ export interface GrowLogEntry {
   watering?: { amountMl: number; ph?: number };
   nutrients?: { name: string; dosageMl: number }[];
   photos?: string[];
+  temperatureC?: number;
+  humidityPct?: number;
 }
 
 export interface GrowLog {

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useState, useMemo, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Search, X, Star, MapPin, ChevronDown, SlidersHorizontal, AlertCircle } from "lucide-react";
 import type { MapLocation, MapCategory, LocationContinent } from "@/types";
 import { cn } from "@/lib/utils";
+import { ProposeSpotModal } from "@/components/map/propose-spot-modal";
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -259,6 +260,22 @@ function StatsBar({ locations }: { locations: MapLocation[] }) {
   );
 }
 
+// Captura clics del mapa cuando el modo selección está activo
+function MapClickHandler({
+  active,
+  onMapClick,
+}: {
+  active: boolean;
+  onMapClick: (lat: number, lng: number) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      if (active) onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const SORT_OPTIONS = [
@@ -286,6 +303,11 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
   const [sortBy,          setSortBy]          = useState<SortKey>("rating");
   const [showDemoOnly,    setShowDemoOnly]     = useState(false);
   const [showVerified,    setShowVerified]     = useState(false);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [pendingCoords, setPendingCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const countries = useMemo(() => {
     const set = new Set(locations.map((l) => l.country));
@@ -322,6 +344,43 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
   const mapMarkers  = filtered.slice(0, MAP_MARKER_LIMIT);
   const markersCapped = filtered.length > MAP_MARKER_LIMIT;
   const mapCenter: [number, number] = [45, 8];
+
+  // Detecta sesión activa usando el cliente browser de Supabase
+  useEffect(() => {
+    const supabaseConfigured = !!(
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
+    if (!supabaseConfigured) return;
+
+    // Importación dinámica para no romper si Supabase no está configurado
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      const supabase = createClient();
+
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setIsLoggedIn(!!session);
+      });
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_, session) => {
+        setIsLoggedIn(!!session);
+      });
+
+      return () => subscription.unsubscribe();
+    });
+  }, []);
+
+  function handleMapClick(lat: number, lng: number) {
+    setPendingCoords({ lat, lng });
+    setSelectionMode(false);
+    setModalOpen(true);
+  }
+
+  function handleModalClose() {
+    setModalOpen(false);
+    setPendingCoords(null);
+  }
 
   return (
     <div className="flex flex-col gap-5 w-full">
@@ -366,6 +425,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
           </button>
         ))}
         <div className="w-px h-4 bg-border mx-1 shrink-0" />
+        
         {/* Demo / Verified toggles */}
         <button
           onClick={() => setShowDemoOnly((v) => !v)}
@@ -499,7 +559,12 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
       )}
 
       {/* ── Map ── */}
-      <div className="h-[60vh] min-h-[420px] w-full overflow-hidden rounded-xl border border-border shadow-md relative">
+      <div
+        className={cn(
+          "h-[60vh] min-h-[420px] w-full overflow-hidden rounded-xl border border-border shadow-md relative",
+          selectionMode && "[&_.leaflet-container]:cursor-crosshair"
+        )}
+      >
         {filtered.length === 0 && (
           <div className="absolute inset-0 z-[400] flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl pointer-events-none">
             <div className="text-center space-y-2">
@@ -509,11 +574,36 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
             </div>
           </div>
         )}
+
+        {/* Banner de modo selección */}
+        {selectionMode && (
+          <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-[1000] rounded-full bg-amber-500/95 px-5 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm whitespace-nowrap">
+            📍 Haz clic en el mapa para ubicar el spot
+          </div>
+        )}
+
+        {/* Botón flotante — solo para usuarios autenticados */}
+        {isLoggedIn && (
+          <button
+            onClick={() => setSelectionMode((prev) => !prev)}
+            className={cn(
+              "absolute bottom-6 right-4 z-[1000] flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer",
+              selectionMode
+                ? "bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700"
+                : "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800"
+            )}
+          >
+            <MapPin className="size-4" />
+            {selectionMode ? "Cancelar" : "Proponer Spot"}
+          </button>
+        )}
+
         <MapContainer center={mapCenter} zoom={3} className="size-full" scrollWheelZoom>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapClickHandler active={selectionMode} onMapClick={handleMapClick} />
           {mapMarkers.map((loc) => (
             <Marker
               key={loc.id}
@@ -578,6 +668,16 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
           </div>
         )}
       </div>
+
+      {/* Modal de propuesta de spot */}
+      {pendingCoords && (
+        <ProposeSpotModal
+          open={modalOpen}
+          lat={pendingCoords.lat}
+          lng={pendingCoords.lng}
+          onClose={handleModalClose}
+        />
+      )}
     </div>
   );
 }

@@ -46,6 +46,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PerfilPage({ params }: PageProps) {
   const { username } = await params;
+
+  const supabaseReady = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
+
+  if (!supabaseReady) {
+    return <PerfilDemo username={username} />;
+  }
+
   const supabase = await createClient();
 
   // 1. Obtener perfil
@@ -258,6 +267,46 @@ export default async function PerfilPage({ params }: PageProps) {
               )}
             </CardContent>
           </Card>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function PerfilDemo({ username }: { username: string }) {
+  const initials = username.substring(0, 2).toUpperCase();
+  return (
+    <main className="min-h-screen pb-12 bg-background">
+      <div className="h-48 sm:h-64 w-full bg-gradient-to-br from-brand-green via-emerald-900 to-brand-green-deep relative border-b border-border/20" />
+
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 relative -mt-20">
+        <div className="rounded-3xl bg-card p-6 sm:p-8 shadow-xl border border-border/30">
+          <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6">
+            <div className="relative shrink-0 border-4 border-card rounded-full bg-card shadow-lg -mt-16 sm:-mt-24 z-10">
+              <div className="rounded-full p-1 bg-gradient-to-br from-brand-gold-light via-brand-gold to-brand-gold-dark">
+                <div className="size-28 sm:size-32 rounded-full bg-brand-green flex items-center justify-center text-brand-pearl text-3xl font-bold border-2 border-card select-none">
+                  {initials}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">@{username}</h1>
+                <Badge variant="outline" className="text-[10px] uppercase font-semibold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200/50">
+                  Cultivador
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground font-medium">@{username}</p>
+            </div>
+          </div>
+
+          <Separator className="my-6 bg-border/50" />
+
+          <div className="rounded-md border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700/40 dark:bg-amber-950/40 dark:text-amber-200">
+            ⚠ Los perfiles de usuario requieren Supabase configurado. Conecta tu proyecto en{" "}
+            <code className="text-xs font-mono">.env.local</code> para ver este perfil real.
+          </div>
         </div>
       </div>
     </main>

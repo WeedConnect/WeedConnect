@@ -25,6 +25,8 @@ export function mapGrowEntryFromDb(row: any): GrowLogEntry {
         }))
       : undefined,
     photos: Array.isArray(row.photos) ? row.photos : [],
+    temperatureC: row.temperature_c != null ? Number(row.temperature_c) : undefined,
+    humidityPct: row.humidity_pct != null ? Number(row.humidity_pct) : undefined,
   };
 }
 
@@ -148,6 +150,8 @@ export async function addGrowEntry(
     watering_ph: entry.watering?.ph || null,
     nutrients: entry.nutrients || null,
     photos: entry.photos || [],
+    temperature_c: entry.temperatureC ?? null,
+    humidity_pct: entry.humidityPct ?? null,
   };
 
   const { data, error } = await supabase

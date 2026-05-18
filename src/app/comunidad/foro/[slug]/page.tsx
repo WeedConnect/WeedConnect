@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ReplyForm } from "@/components/forum/reply-form";
 import { VoteButton } from "@/components/forum/vote-button";
 import { LocalThreadView } from "@/components/forum/local-thread-view";
+import { LevelBadge } from "@/components/gamification/level-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,9 @@ export default async function ThreadPage({
                 </Badge>
               )}
               <span>por @{thread.profiles?.username ?? "anónimo"}</span>
+              {thread.profiles?.points !== undefined && (
+                <LevelBadge points={thread.profiles.points} />
+              )}
               <span>· {relativeTime(thread.created_at)}</span>
             </div>
             <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
@@ -139,6 +143,9 @@ export default async function ThreadPage({
                   <span className="font-medium text-foreground">
                     @{post.profiles?.username ?? "anónimo"}
                   </span>
+                  {post.profiles?.points !== undefined && (
+                    <LevelBadge points={post.profiles.points} />
+                  )}
                   <span>· {relativeTime(post.created_at)}</span>
                 </div>
                 <p className="mt-3 leading-relaxed whitespace-pre-wrap">{post.body}</p>

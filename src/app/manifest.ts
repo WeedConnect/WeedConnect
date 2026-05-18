@@ -5,13 +5,13 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "WeedConnect",
     short_name: "WeedConnect",
     description:
-      "Hub de la comunidad cannábica. Foro, strains, mapa de clubes y grow tracker.",
+      "El hub de la comunidad cannábica. Foro, mapa de clubs, catálogo de strains y más.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait-primary",
     background_color: "#022c22",
     theme_color: "#059669",
-    lang: "es",
+    lang: "es-ES",
     categories: ["social", "lifestyle"],
     icons: [
       {
@@ -46,12 +46,7 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         name: "Mapa",
         url: "/mapa",
-        description: "Mapa de asociaciones y spots chill",
-      },
-      {
-        name: "Asistente IA",
-        url: "/herramientas/asistente",
-        description: "Consulta al asistente cannábico",
+        description: "Mapa de asociaciones y spots chill en Europa",
       },
     ],
   };

@@ -18,7 +18,7 @@ export type ForumThread = {
   created_at: string;
   pinned: boolean;
   locked: boolean;
-  profiles: { username: string } | null;
+  profiles: { username: string; points: number } | null;
   forum_categories: { name: string; slug: string } | null;
   reply_count: number;
 };
@@ -27,7 +27,7 @@ export type ForumPost = {
   id: string;
   body: string;
   created_at: string;
-  profiles: { username: string } | null;
+  profiles: { username: string; points: number } | null;
 };
 
 export function relativeTime(dateStr: string): string {
@@ -68,7 +68,7 @@ export async function getThreads(categorySlug?: string): Promise<ForumThread[]> 
   let query = supabase
     .from("forum_threads")
     .select(
-      "id, slug, title, body, media_urls, created_at, pinned, locked, profiles!author_id(username), forum_categories!category_id(name, slug)",
+      "id, slug, title, body, media_urls, created_at, pinned, locked, profiles!author_id(username, points), forum_categories!category_id(name, slug)",
     )
     .order("pinned", { ascending: false })
     .order("created_at", { ascending: false });
@@ -103,7 +103,7 @@ export async function getThread(slug: string): Promise<ForumThread | null> {
   const { data } = await supabase
     .from("forum_threads")
     .select(
-      "id, slug, title, body, media_urls, created_at, pinned, locked, profiles!author_id(username), forum_categories!category_id(name, slug)",
+      "id, slug, title, body, media_urls, created_at, pinned, locked, profiles!author_id(username, points), forum_categories!category_id(name, slug)",
     )
     .eq("slug", slug)
     .single();
@@ -115,7 +115,7 @@ export async function getThreadPosts(threadId: string): Promise<ForumPost[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("forum_posts")
-    .select("id, body, created_at, profiles!author_id(username)")
+    .select("id, body, created_at, profiles!author_id(username, points)")
     .eq("thread_id", threadId)
     .order("created_at");
   return (data as unknown as ForumPost[]) ?? [];

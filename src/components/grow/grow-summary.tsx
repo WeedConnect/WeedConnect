@@ -1,4 +1,4 @@
-import { CalendarDays, Droplets, Hash, Leaf, CheckCircle2 } from "lucide-react";
+import { CalendarDays, Droplets, Hash, Leaf, CheckCircle2, Thermometer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { GrowLog, GrowLogEntry, GrowStage } from "@/types";
@@ -51,13 +51,14 @@ export function GrowSummary({ log }: GrowSummaryProps) {
   const daysElapsed = daysBetween(log.startedAt, log.finishedAt);
 
   const lastWatering = entries.find((e) => e.watering);
+  const lastClimate = entries.find((e) => e.temperatureC != null || e.humidityPct != null);
 
   const isFinished = !!log.finishedAt;
 
   return (
     <div className="space-y-4">
       {/* Stats rápidas */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-5">
         <StatCard
           icon={<CalendarDays className="size-4 text-emerald-500" />}
           label={isFinished ? "Duración total" : "Días de cultivo"}
@@ -84,6 +85,20 @@ export function GrowSummary({ log }: GrowSummaryProps) {
             lastWatering
               ? `${relativeTime(lastWatering.date)}${lastWatering.watering!.ph ? ` · pH ${lastWatering.watering!.ph}` : ""}`
               : "Sin registros de riego"
+          }
+        />
+        <StatCard
+          icon={<Thermometer className="size-4 text-orange-500" />}
+          label="Ambiente"
+          value={
+            lastClimate?.temperatureC != null
+              ? `${lastClimate.temperatureC}°C`
+              : "—"
+          }
+          sub={
+            lastClimate
+              ? `${lastClimate.humidityPct != null ? `HR ${lastClimate.humidityPct}%` : "Sin humedad"} · ${relativeTime(lastClimate.date)}`
+              : "Sin registros de clima"
           }
         />
       </div>

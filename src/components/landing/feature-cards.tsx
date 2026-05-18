@@ -84,7 +84,7 @@ const FEATURES: Feature[] = [
 
 export function FeatureCards() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 bg-grid-dots relative">
+    <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24 bg-grid-dots relative overflow-hidden">
       {/* Subtle ambient glows */}
       <div className="absolute top-1/3 right-0 -z-10 size-96 rounded-full bg-brand-gold/5 blur-3xl dark:bg-brand-gold/3 opacity-60" />
       <div className="absolute bottom-1/3 left-0 -z-10 size-96 rounded-full bg-brand-green/5 blur-3xl dark:bg-emerald-600/3 opacity-60" />

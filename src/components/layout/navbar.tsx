@@ -88,7 +88,7 @@ export function Navbar() {
           <LogoWeedConnect showText className="size-8" textClassName="text-lg font-bold tracking-tight" />
         </Link>
 
-        <nav className="hidden md:flex md:items-center md:gap-1">
+        <nav className="hidden lg:flex lg:items-center lg:gap-1">
           {MAIN_NAV.map((item) =>
             item.children?.length ? (
               <DropdownMenu key={item.href}>
@@ -202,7 +202,7 @@ export function Navbar() {
             </Link>
           )}
           
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <MobileNav />
           </div>
         </div>

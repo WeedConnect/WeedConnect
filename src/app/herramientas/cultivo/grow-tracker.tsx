@@ -21,6 +21,10 @@ import {
   Flag,
   RotateCcw,
   Download,
+  Thermometer,
+  Wind,
+  AlertTriangle,
+  CheckCircle2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -114,10 +118,16 @@ export function GrowTracker() {
   const [newEntryWaterMl, setNewEntryWaterMl] = useState("");
   const [newEntryPh, setNewEntryPh] = useState("");
   const [newEntryNutrients, setNewEntryNutrients] = useState("");
+  const [newEntryTempC, setNewEntryTempC] = useState("");
+  const [newEntryHumidity, setNewEntryHumidity] = useState("");
   const [newEntryPhotos, setNewEntryPhotos] = useState<SelectedFile[]>([]);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const [pendingDeleteLogId, setPendingDeleteLogId] = useState<string | null>(null);
+  const [pendingDeleteEntryId, setPendingDeleteEntryId] = useState<string | null>(null);
+  const [migrationSuccess, setMigrationSuccess] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -213,10 +223,10 @@ export function GrowTracker() {
         setSelectedLog(cloudLogs[0].id);
       }
       
-      alert("🎉 ¡Tus cultivos locales se han sincronizado con tu cuenta con éxito!");
+      setMigrationSuccess(true);
     } catch (err) {
       console.error("[GrowTracker] Error en migración:", err);
-      alert("Ocurrió un error sincronizando tus cultivos locales. Por favor intenta de nuevo.");
+      console.error("[GrowTracker] Error en migración — los datos locales siguen intactos.");
     } finally {
       setIsMigrating(false);
     }
@@ -262,28 +272,22 @@ export function GrowTracker() {
   }
 
   async function deleteLog(id: string) {
-    if (!confirm("¿Estás seguro de que deseas eliminar este cultivo y todas sus entradas de forma permanente?")) {
-      return;
-    }
-    
     setIsSaving(true);
     try {
       if (user) {
         await deleteGrowLog(supabase, id);
       }
-      
       const updated = logs.filter((l) => l.id !== id);
       setLogs(updated);
-      
       if (!user) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       }
-      
       if (selectedLog === id) setSelectedLog(null);
     } catch (err) {
       console.error("[GrowTracker] Error al eliminar cultivo:", err);
     } finally {
       setIsSaving(false);
+      setPendingDeleteLogId(null);
     }
   }
 
@@ -351,6 +355,8 @@ export function GrowTracker() {
             : undefined,
         nutrients: nutrients.length > 0 ? nutrients : undefined,
         photos: photoPaths,
+        temperatureC: newEntryTempC ? parseFloat(newEntryTempC) : undefined,
+        humidityPct: newEntryHumidity ? parseFloat(newEntryHumidity) : undefined,
       };
 
       if (user) {
@@ -381,6 +387,8 @@ export function GrowTracker() {
       setNewEntryWaterMl("");
       setNewEntryPh("");
       setNewEntryNutrients("");
+      setNewEntryTempC("");
+      setNewEntryHumidity("");
       newEntryPhotos.forEach((p) => URL.revokeObjectURL(p.preview));
       setNewEntryPhotos([]);
       setPhotoError(null);
@@ -392,19 +400,15 @@ export function GrowTracker() {
   }
 
   async function deleteEntry(logId: string, entryId: string) {
-    if (!confirm("¿Eliminar esta entrada del diario?")) return;
-    
     setIsSaving(true);
     try {
       if (user) {
         await deleteGrowEntry(supabase, entryId);
       }
-      
       const updated = logs.map((l) =>
         l.id === logId ? { ...l, entries: l.entries.filter((e) => e.id !== entryId) } : l,
       );
       setLogs(updated);
-      
       if (!user) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       }
@@ -412,6 +416,7 @@ export function GrowTracker() {
       console.error("[GrowTracker] Error al eliminar entrada:", err);
     } finally {
       setIsSaving(false);
+      setPendingDeleteEntryId(null);
     }
   }
 
@@ -497,8 +502,16 @@ export function GrowTracker() {
         </Button>
       </header>
 
-      {/* Banner de Migración de Datos Locales */}
-      {user && hasLocalData && (
+      {/* Banner de migración / éxito de migración */}
+      {user && migrationSuccess && (
+        <div className="mb-6 rounded-lg border border-emerald-300/50 bg-emerald-50/60 p-4 dark:border-emerald-800/50 dark:bg-emerald-950/20 flex items-center gap-3">
+          <CheckCircle2 className="size-5 text-emerald-600 shrink-0" />
+          <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
+            ¡Cultivos sincronizados con éxito! Ya están guardados en tu cuenta.
+          </p>
+        </div>
+      )}
+      {user && hasLocalData && !migrationSuccess && (
         <div className="mb-6 rounded-lg border border-emerald-300/50 bg-emerald-50/60 p-4 dark:border-emerald-800/50 dark:bg-emerald-950/20">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
@@ -606,39 +619,64 @@ export function GrowTracker() {
           {/* Sidebar: lista de logs */}
           <div className="flex flex-col gap-2">
             {logs.map((log) => (
-              <button
+              <div
                 key={log.id}
-                type="button"
-                onClick={() => setSelectedLog(log.id)}
                 className={cn(
-                  "flex items-start justify-between gap-2 rounded-lg border px-3 py-3 text-left text-sm transition-colors",
+                  "rounded-lg border text-sm transition-colors",
                   selectedLog === log.id
                     ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
-                    : "border-border hover:bg-muted/50",
+                    : "border-border",
                 )}
               >
-                <div className="overflow-hidden">
-                  <p className="font-medium leading-snug truncate">{log.name}</p>
-                  {log.strainId && (
-                    <p className="text-xs text-muted-foreground truncate">{log.strainId}</p>
-                  )}
-                  <p className="mt-0.5 text-xs text-muted-foreground whitespace-nowrap">
-                    Inicio: {formatDate(log.startedAt)} · {log.entries?.length || 0} {log.entries?.length === 1 ? "entrada" : "entradas"}
-                  </p>
-                </div>
                 <button
                   type="button"
-                  disabled={isSaving}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteLog(log.id);
-                  }}
-                  className="shrink-0 text-muted-foreground/40 hover:text-destructive transition-colors focus:outline-none p-0.5 rounded"
-                  aria-label="Eliminar cultivo"
+                  onClick={() => { setSelectedLog(log.id); setPendingDeleteLogId(null); }}
+                  className="flex w-full items-start justify-between gap-2 px-3 py-3 text-left hover:bg-muted/30 rounded-lg transition-colors"
                 >
-                  <Trash2 className="size-3.5" />
+                  <div className="overflow-hidden">
+                    <p className="font-medium leading-snug truncate">{log.name}</p>
+                    {log.strainId && (
+                      <p className="text-xs text-muted-foreground truncate">{log.strainId}</p>
+                    )}
+                    <p className="mt-0.5 text-xs text-muted-foreground whitespace-nowrap">
+                      {formatDate(log.startedAt)} · {log.entries?.length || 0} {log.entries?.length === 1 ? "entrada" : "entradas"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isSaving}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPendingDeleteLogId(pendingDeleteLogId === log.id ? null : log.id);
+                    }}
+                    className="shrink-0 text-muted-foreground/40 hover:text-destructive transition-colors focus:outline-none p-0.5 rounded"
+                    aria-label="Eliminar cultivo"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
                 </button>
-              </button>
+                {pendingDeleteLogId === log.id && (
+                  <div className="flex items-center gap-2 border-t border-red-200 dark:border-red-900/40 bg-red-50/60 dark:bg-red-950/20 px-3 py-2 rounded-b-lg">
+                    <AlertTriangle className="size-3.5 text-red-500 shrink-0" />
+                    <span className="text-xs text-red-700 dark:text-red-400 flex-1">¿Eliminar permanentemente?</span>
+                    <button
+                      type="button"
+                      disabled={isSaving}
+                      onClick={() => deleteLog(log.id)}
+                      className="text-xs font-semibold text-red-600 hover:text-red-800 dark:text-red-400 px-1"
+                    >
+                      {isSaving ? <Loader2 className="size-3 animate-spin" /> : "Sí"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPendingDeleteLogId(null)}
+                      className="text-xs text-muted-foreground hover:text-foreground px-1"
+                    >
+                      No
+                    </button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
 
@@ -772,6 +810,38 @@ export function GrowTracker() {
                         disabled={isSaving}
                       />
                     </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="grid gap-1.5">
+                        <Label htmlFor="entry-temp">
+                          Temperatura (°C)
+                        </Label>
+                        <Input
+                          id="entry-temp"
+                          type="number"
+                          step="0.5"
+                          placeholder="p. ej. 24"
+                          value={newEntryTempC}
+                          onChange={(e) => setNewEntryTempC(e.target.value)}
+                          disabled={isSaving}
+                        />
+                      </div>
+                      <div className="grid gap-1.5">
+                        <Label htmlFor="entry-humidity">
+                          Humedad relativa (%)
+                        </Label>
+                        <Input
+                          id="entry-humidity"
+                          type="number"
+                          step="1"
+                          min="0"
+                          max="100"
+                          placeholder="p. ej. 55"
+                          value={newEntryHumidity}
+                          onChange={(e) => setNewEntryHumidity(e.target.value)}
+                          disabled={isSaving}
+                        />
+                      </div>
+                    </div>
                     <div className="grid gap-1.5">
                       <Label htmlFor="entry-notes">Notas</Label>
                       <Textarea
@@ -903,6 +973,13 @@ export function GrowTracker() {
                                     {entry.nutrients.length} {entry.nutrients.length === 1 ? "nutriente" : "nutrientes"}
                                   </span>
                                 )}
+                                {entry.temperatureC != null && (
+                                  <span className="flex items-center gap-1 text-xs text-muted-foreground bg-orange-50/50 dark:bg-orange-950/20 px-1.5 py-0.5 rounded">
+                                    <Thermometer className="size-3 text-orange-500" />
+                                    {entry.temperatureC}°C
+                                    {entry.humidityPct != null && ` · ${entry.humidityPct}%HR`}
+                                  </span>
+                                )}
                                 {entry.notes && (
                                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                                     <FileText className="size-3 text-slate-400" />
@@ -917,9 +994,16 @@ export function GrowTracker() {
                                 disabled={isSaving}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteEntry(activeLog.id, entry.id);
+                                  setPendingDeleteEntryId(
+                                    pendingDeleteEntryId === entry.id ? null : entry.id,
+                                  );
                                 }}
-                                className="text-muted-foreground/40 hover:text-destructive transition-colors p-0.5 rounded"
+                                className={cn(
+                                  "transition-colors p-0.5 rounded",
+                                  pendingDeleteEntryId === entry.id
+                                    ? "text-destructive"
+                                    : "text-muted-foreground/40 hover:text-destructive",
+                                )}
                                 aria-label="Eliminar entrada"
                               >
                                 <Trash2 className="size-3.5" />
@@ -931,6 +1015,27 @@ export function GrowTracker() {
                               )}
                             </div>
                           </div>
+                          {pendingDeleteEntryId === entry.id && (
+                            <div className="flex items-center gap-2 border-t border-red-200 dark:border-red-900/40 bg-red-50/60 dark:bg-red-950/20 px-4 py-2">
+                              <AlertTriangle className="size-3.5 text-red-500 shrink-0" />
+                              <span className="text-xs text-red-700 dark:text-red-400 flex-1">¿Eliminar esta entrada?</span>
+                              <button
+                                type="button"
+                                disabled={isSaving}
+                                onClick={() => deleteEntry(activeLog.id, entry.id)}
+                                className="text-xs font-semibold text-red-600 hover:text-red-800 dark:text-red-400 px-2"
+                              >
+                                {isSaving ? <Loader2 className="size-3 animate-spin" /> : "Sí, eliminar"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPendingDeleteEntryId(null)}
+                                className="text-xs text-muted-foreground hover:text-foreground"
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          )}
                           {expanded && (
                             <CardContent className="pt-0">
                               <div className="border-t border-border pt-3 animate-tw-animate-fade-in">
@@ -950,6 +1055,25 @@ export function GrowTracker() {
                                       {entry.nutrients
                                         .map((n) => `${n.name} (${n.dosageMl}ml)`)
                                         .join(", ")}
+                                    </span>
+                                  </div>
+                                )}
+                                {(entry.temperatureC != null || entry.humidityPct != null) && (
+                                  <div className="mb-2 text-sm flex gap-2">
+                                    <span className="font-medium text-muted-foreground">Ambiente:</span>
+                                    <span className="flex items-center gap-2">
+                                      {entry.temperatureC != null && (
+                                        <span className="flex items-center gap-1">
+                                          <Thermometer className="size-3 text-orange-500" />
+                                          {entry.temperatureC}°C
+                                        </span>
+                                      )}
+                                      {entry.humidityPct != null && (
+                                        <span className="flex items-center gap-1">
+                                          <Wind className="size-3 text-sky-500" />
+                                          {entry.humidityPct}% HR
+                                        </span>
+                                      )}
                                     </span>
                                   </div>
                                 )}
