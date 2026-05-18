@@ -30,8 +30,18 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold">Legal</h3>
+          <h3 className="text-sm font-semibold">Legal y Comunidad</h3>
           <ul className="mt-3 space-y-2 text-sm">
+            <li>
+              <Link href="/comunidad/normas" className="text-muted-foreground transition-colors hover:text-foreground">
+                Normas de la comunidad
+              </Link>
+            </li>
+            <li>
+              <Link href="/info/legal" className="text-muted-foreground transition-colors hover:text-foreground">
+                Marco legal
+              </Link>
+            </li>
             <li>
               <Link href="/legal/aviso-legal" className="text-muted-foreground transition-colors hover:text-foreground">
                 Aviso legal

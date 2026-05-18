@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MessageSquare, PenSquare } from "lucide-react";
+import { MessageSquare, PenSquare, ShieldCheck } from "lucide-react";
 import { VoteButton } from "@/components/forum/vote-button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -50,6 +50,18 @@ export default async function ForoPage({
           Nuevo hilo
         </Link>
       </header>
+
+      {/* Aviso de normas */}
+      <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50/50 dark:border-emerald-900/40 dark:bg-emerald-950/10 px-4 py-3 text-sm">
+        <ShieldCheck className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+        <p className="text-foreground/80 leading-relaxed">
+          <strong className="text-emerald-700 dark:text-emerald-400">Comunidad respetuosa.</strong>{" "}
+          Prohibida la compraventa, contactos para conseguir sustancias e intermediación.{" "}
+          <Link href="/comunidad/normas" className="underline underline-offset-2 hover:text-emerald-600 font-medium">
+            Ver normas completas →
+          </Link>
+        </p>
+      </div>
 
       <ForumCategoryTabs categories={categories} active={categoria} />
 

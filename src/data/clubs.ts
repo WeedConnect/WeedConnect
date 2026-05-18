@@ -182,12 +182,135 @@ export const MOCK_CLUBS: Club[] = [
     membershipRequired: false,
     createdAt: "2026-05-01T12:00:00Z",
   },
+  // --- COMIDA ---
+  {
+    id: "13",
+    slug: "burger-nocturna-barcelona",
+    name: "24 Kitchen Burgers (Ejemplo demo)",
+    category: "comida",
+    tags: ["Abierto tarde", "Burger", "Munchie perfecto"],
+    description: "Hamburguesería con horario nocturno ampliado. Perfecta cuando el antojo ataca a deshoras. Ejemplo de punto de interés gastronómico.",
+    address: "Carrer de Còrsega, 341",
+    city: "Barcelona",
+    country: "ES",
+    lat: 41.3977,
+    lng: 2.1631,
+    membershipRequired: false,
+    createdAt: "2026-05-01T12:00:00Z",
+  },
+  {
+    id: "14",
+    slug: "kebab-24h-madrid-centro",
+    name: "Kebab 24h Tirso (Ejemplo demo)",
+    category: "comida",
+    tags: ["24h", "Kebab", "Económico", "Para picar"],
+    description: "Puesto de kebab abierto las 24h cerca de Tirso de Molina. El salvavidas del antojo nocturno con precio imbatible. Dato de referencia demo.",
+    address: "Calle de la Magdalena, 18",
+    city: "Madrid",
+    country: "ES",
+    lat: 40.4130,
+    lng: -3.7028,
+    membershipRequired: false,
+    createdAt: "2026-05-01T12:00:00Z",
+  },
+  {
+    id: "15",
+    slug: "heladeria-nocturna-valencia",
+    name: "Heladería Sirvent (Ejemplo demo)",
+    category: "comida",
+    tags: ["Helados", "Dulce", "Verano"],
+    description: "Heladería artesanal con horario ampliado en verano. El destino perfecto para calmar el antojo dulce en una noche cálida. Dato demo orientativo.",
+    address: "Carrer de Russafa, 40",
+    city: "València",
+    country: "ES",
+    lat: 39.4628,
+    lng: -0.3744,
+    membershipRequired: false,
+    createdAt: "2026-05-01T12:00:00Z",
+  },
+  // --- NOCHE ---
+  {
+    id: "16",
+    slug: "bar-chill-terraza-barcelona",
+    name: "Terraza Bar Exemple (Ejemplo demo)",
+    category: "noche",
+    tags: ["Terraza", "Ambiente tranquilo", "Cócteles"],
+    description: "Bar con terraza acogedora y música lo-fi. Ideal para una salida nocturna tranquila con amigos sin el ruido de las discotecas. Punto de referencia demo.",
+    address: "Carrer de Provença, 190",
+    city: "Barcelona",
+    country: "ES",
+    lat: 41.3929,
+    lng: 2.1560,
+    membershipRequired: false,
+    createdAt: "2026-05-01T12:00:00Z",
+  },
+  {
+    id: "17",
+    slug: "bar-tardeo-madrid-malasana",
+    name: "Bar Tardeo Malasaña (Ejemplo demo)",
+    category: "noche",
+    tags: ["Tardeo", "Tranquilo", "Vinilo", "Plan con amigos"],
+    description: "Bar de barrio con buena selección de vinilos, ambiente relajado y terraza pequeña. El tardeo perfecto para un plan tranquilo con el grupo. Dato demo.",
+    address: "Calle de San Andrés, 14",
+    city: "Madrid",
+    country: "ES",
+    lat: 40.4266,
+    lng: -3.7040,
+    membershipRequired: false,
+    createdAt: "2026-05-01T12:00:00Z",
+  },
+  // --- SPOTS CHILL / PLAN AMIGOS ---
+  {
+    id: "18",
+    slug: "parque-ciutadella-barcelona",
+    name: "Parc de la Ciutadella",
+    category: "parque",
+    tags: ["Lago", "Zona picnic", "Plan amigos", "Diurno"],
+    description: "El parque urbano más querido de Barcelona. Lago en barca, praderas para tumbarse, fuente monumental y ambiente diverso. Ideal para grupos.",
+    address: "Passeig de Picasso",
+    city: "Barcelona",
+    country: "ES",
+    lat: 41.3869,
+    lng: 2.1869,
+    membershipRequired: false,
+    createdAt: "2026-05-01T12:00:00Z",
+  },
+  {
+    id: "19",
+    slug: "mirador-tibidabo-barcelona",
+    name: "Mirador del Tibidabo",
+    category: "mirador",
+    tags: ["Vistas 360°", "Anochecer", "Romántico", "Espectacular"],
+    description: "Las mejores vistas de Barcelona: toda la ciudad, el mar y, con suerte, los Pirineos. El atardecer desde aquí es una experiencia difícil de superar.",
+    address: "Plaça del Tibidabo",
+    city: "Barcelona",
+    country: "ES",
+    lat: 41.4216,
+    lng: 2.1186,
+    membershipRequired: false,
+    createdAt: "2026-05-01T12:00:00Z",
+  },
+  {
+    id: "20",
+    slug: "parque-buen-retiro-finde",
+    name: "Parque del Retiro — zona lago",
+    category: "spot_relax",
+    tags: ["Lago", "Patos", "Plan tranquilo", "Domingo"],
+    description: "La orilla del lago grande del Retiro, un domingo con sol y música de fondo. El plan chill madrileño por excelencia para grupos pequeños.",
+    address: "Plaza de la Independencia",
+    city: "Madrid",
+    country: "ES",
+    lat: 40.4150,
+    lng: -3.6840,
+    membershipRequired: false,
+    createdAt: "2026-05-01T12:00:00Z",
+  },
 
-  // --- EUROPA (mock data — reemplazar con datos reales de CATFAC/FAC/Weed-Maps) ---
+  // --- EUROPA ---
 
   // Alemania — Anbauvereinigungen legalizadas desde abril 2024
   {
-    id: "13",
+    id: "21",
     slug: "csc-berlin-friedrichshain",
     name: "Friedrichshain Hanfverein",
     category: "asociacion",
@@ -202,7 +325,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "14",
+    id: "22",
     slug: "csc-berlin-kreuzberg",
     name: "Kreuzberg Cannabis Verein",
     category: "asociacion",
@@ -217,7 +340,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "15",
+    id: "23",
     slug: "csc-munich-schwabing",
     name: "München Grüne Gemeinschaft",
     category: "asociacion",
@@ -232,7 +355,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "16",
+    id: "24",
     slug: "csc-hamburg-altona",
     name: "Elbe Hanfverein",
     category: "asociacion",
@@ -247,7 +370,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "17",
+    id: "25",
     slug: "csc-koeln-ehrenfeld",
     name: "Kölner Hanf Gemeinschaft",
     category: "asociacion",
@@ -264,7 +387,7 @@ export const MOCK_CLUBS: Club[] = [
 
   // Países Bajos — coffeeshops (tolerancia regulada)
   {
-    id: "18",
+    id: "26",
     slug: "coffeeshop-amsterdam-vondelpark",
     name: "Green Leaf Vondelpark",
     category: "asociacion",
@@ -279,7 +402,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "19",
+    id: "27",
     slug: "coffeeshop-amsterdam-jordaan",
     name: "The Jordaan Smoke Lounge",
     category: "asociacion",
@@ -294,7 +417,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "20",
+    id: "28",
     slug: "csc-rotterdam-centrum",
     name: "Rotterdam Groen Collectief",
     category: "asociacion",
@@ -311,7 +434,7 @@ export const MOCK_CLUBS: Club[] = [
 
   // Portugal — despenalizado desde 2001
   {
-    id: "21",
+    id: "29",
     slug: "csc-lisboa-bairro-alto",
     name: "Lisboa Cannabis Social Club",
     category: "asociacion",
@@ -326,7 +449,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "22",
+    id: "30",
     slug: "csc-porto-baixa",
     name: "Porto Verde Club",
     category: "asociacion",
@@ -343,7 +466,7 @@ export const MOCK_CLUBS: Club[] = [
 
   // República Checa — alta tolerancia, Praga
   {
-    id: "23",
+    id: "31",
     slug: "club-praga-zizkov",
     name: "Praha Zelený Klub",
     category: "asociacion",
@@ -360,7 +483,7 @@ export const MOCK_CLUBS: Club[] = [
 
   // Malta — único país de la UE con legalización para uso personal (2021)
   {
-    id: "24",
+    id: "32",
     slug: "club-malta-valletta",
     name: "Malta Cannabis Association",
     category: "asociacion",
@@ -377,7 +500,7 @@ export const MOCK_CLUBS: Club[] = [
 
   // Suiza — programas piloto de CSC desde 2023
   {
-    id: "25",
+    id: "33",
     slug: "csc-zurich-pilot",
     name: "Zürich Cannabis Pilot Verein",
     category: "asociacion",
@@ -392,7 +515,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "26",
+    id: "34",
     slug: "csc-basilea-hanfclub",
     name: "Basel Hanf Club Pilotversuch",
     category: "asociacion",
@@ -407,7 +530,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "27",
+    id: "35",
     slug: "csc-ginebra-canclub",
     name: "Genève Cannabis Social Club",
     category: "asociacion",
@@ -424,7 +547,7 @@ export const MOCK_CLUBS: Club[] = [
 
   // Bélgica — programa piloto aprobado en Bruselas 2024
   {
-    id: "28",
+    id: "36",
     slug: "csc-bruselas-cannaclub",
     name: "Bruxelles Cannabis Club",
     category: "asociacion",
@@ -441,7 +564,7 @@ export const MOCK_CLUBS: Club[] = [
 
   // Luxemburgo — posesión y cultivo personal legal desde 2023
   {
-    id: "29",
+    id: "37",
     slug: "club-luxemburgo-cannabis",
     name: "Luxembourg Hanfverein",
     category: "asociacion",
@@ -458,7 +581,7 @@ export const MOCK_CLUBS: Club[] = [
 
   // Spots chill — Europa
   {
-    id: "30",
+    id: "38",
     slug: "parque-vondelpark-amsterdam",
     name: "Vondelpark (zona tranquila norte)",
     category: "parque",
@@ -473,7 +596,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "31",
+    id: "39",
     slug: "parque-tempelhof-berlin",
     name: "Tempelhof Freiheit (zona sur)",
     category: "parque",
@@ -488,7 +611,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "32",
+    id: "40",
     slug: "mirador-letna-praga",
     name: "Letenské Sady (Parque Letná)",
     category: "mirador",
@@ -503,7 +626,7 @@ export const MOCK_CLUBS: Club[] = [
     createdAt: "2026-01-01T00:00:00Z",
   },
   {
-    id: "33",
+    id: "41",
     slug: "parque-jardim-estrela-lisboa",
     name: "Jardim da Estrela",
     category: "parque",
@@ -516,7 +639,7 @@ export const MOCK_CLUBS: Club[] = [
     lng: -9.1572,
     membershipRequired: false,
     createdAt: "2026-01-01T00:00:00Z",
-  },
+  }
 ];
 
 export function findClub(slug: string): Club | undefined {
