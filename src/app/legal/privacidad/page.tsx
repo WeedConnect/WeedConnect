@@ -131,7 +131,7 @@ export default function PrivacidadPage() {
           <ul className="ml-5 list-disc space-y-1 text-muted-foreground">
             <li><strong className="text-foreground">Acceso</strong> — obtener confirmación de si tratamos tus datos y recibirlos.</li>
             <li><strong className="text-foreground">Rectificación</strong> — corregir datos inexactos.</li>
-            <li><strong className="text-foreground">Supresión</strong> ("derecho al olvido") — solicitar que borremos tus datos.</li>
+            <li><strong className="text-foreground">Supresión</strong> (&quot;derecho al olvido&quot;) — solicitar que borremos tus datos.</li>
             <li><strong className="text-foreground">Portabilidad</strong> — recibir tus datos en formato legible por máquina (JSON).</li>
             <li><strong className="text-foreground">Oposición y limitación</strong> — oponerte a determinados tratamientos.</li>
             <li><strong className="text-foreground">Retirar el consentimiento</strong> en cualquier momento, sin afectar al tratamiento anterior.</li>

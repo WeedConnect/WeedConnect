@@ -22,8 +22,11 @@ export function LocalThreadView({ slug }: { slug: string }) {
   const [thread, setThread] = useState<LocalThread | null | "loading">("loading");
 
   useEffect(() => {
-    const stored: LocalThread[] = JSON.parse(localStorage.getItem(LOCAL_KEY) ?? "[]");
-    setThread(stored.find((t) => t.slug === slug) ?? null);
+    const loadThread = async () => {
+      const stored: LocalThread[] = JSON.parse(localStorage.getItem(LOCAL_KEY) ?? "[]");
+      setThread(stored.find((t) => t.slug === slug) ?? null);
+    };
+    loadThread();
   }, [slug]);
 
   if (thread === "loading") return null;
