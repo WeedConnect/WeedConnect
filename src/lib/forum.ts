@@ -117,6 +117,44 @@ export async function getThreadPosts(threadId: string): Promise<ForumPost[]> {
   return (data as unknown as ForumPost[]) ?? [];
 }
 
+// --- Moderación de contenido ---
+
+const BLOCKED_PATTERNS = [
+  /\bvend[oa]\b/i,
+  /\bcompr[oa]\b/i,
+  /\bbusco\b/i,
+  /\bcontacto\b/i,
+  /\btelegram\b/i,
+  /\bwhatsapp\b/i,
+  /\bwasap\b/i,
+  /\bprecio[s]?\b/i,
+  /\bdelivery\b/i,
+  /\bdealer\b/i,
+  /\bcamello\b/i,
+  /\bpillar\b/i,
+  /\bgramo[s]?\b/i,
+  /\benvío\b/i,
+  /\benvio\b/i,
+  /\bquien tiene\b/i,
+  /\bquién tiene\b/i,
+  /\bdonde comprar\b/i,
+  /\bdónde comprar\b/i,
+  /\bme pasa\b/i,
+  /\bme pasas\b/i,
+];
+
+export const MODERATION_BLOCK_MESSAGE =
+  "Este contenido no está permitido. WeedConnect no permite compraventa, contactos para conseguir sustancias ni intermediación.";
+
+export function moderateContent(text: string): { blocked: boolean; message?: string } {
+  const normalized = text.toLowerCase();
+  const isBlocked = BLOCKED_PATTERNS.some((pattern) => pattern.test(normalized));
+  if (isBlocked) {
+    return { blocked: true, message: MODERATION_BLOCK_MESSAGE };
+  }
+  return { blocked: false };
+}
+
 // --- Pure Business Logic Utilities ---
 
 export type SortableThread = {

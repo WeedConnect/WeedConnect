@@ -30,11 +30,21 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold">Legal</h3>
-          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>Aviso legal (próximamente)</li>
-            <li>Privacidad (próximamente)</li>
-            <li>+18 — Contenido informativo</li>
+          <h3 className="text-sm font-semibold">Legal y comunidad</h3>
+          <ul className="mt-3 space-y-2 text-sm">
+            <li>
+              <Link href="/comunidad/normas" className="text-muted-foreground transition-colors hover:text-foreground">
+                Normas de la comunidad
+              </Link>
+            </li>
+            <li>
+              <Link href="/info/legal" className="text-muted-foreground transition-colors hover:text-foreground">
+                Marco legal
+              </Link>
+            </li>
+            <li className="text-muted-foreground">Aviso legal (próximamente)</li>
+            <li className="text-muted-foreground">Privacidad (próximamente)</li>
+            <li className="text-muted-foreground">+18 — Contenido informativo</li>
           </ul>
         </div>
       </div>

@@ -14,6 +14,7 @@ export const MAIN_NAV: NavItem[] = [
       { href: "/comunidad/podcast", label: "Podcast" },
       { href: "/comunidad/recetas", label: "Recetas" },
       { href: "/comunidad/grupos", label: "Grupos" },
+      { href: "/comunidad/normas", label: "Normas" },
     ],
   },
   { href: "/mapa", label: "Mapa" },
@@ -31,7 +32,7 @@ export const MAIN_NAV: NavItem[] = [
     href: "/info",
     label: "Info",
     children: [
-      { href: "/info/educacion", label: "Educación" },
+      { href: "/info/educacion", label: "Tips & Educación" },
       { href: "/info/legal", label: "Marco legal" },
       { href: "/info/noticias", label: "Noticias" },
       { href: "/info/peliculas", label: "Pelis" },

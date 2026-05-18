@@ -28,7 +28,7 @@ export interface Strain {
   imageUrl?: string;
 }
 
-export type SpotCategory = "asociacion" | "mirador" | "parque" | "banco" | "playa" | "spot_relax" | "otro";
+export type SpotCategory = "asociacion" | "mirador" | "parque" | "banco" | "playa" | "spot_relax" | "comida" | "noche" | "otro";
 
 export interface Club {
   id: ID;

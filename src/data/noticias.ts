@@ -4,7 +4,13 @@ export type NoticiaCategoria =
   | "cultivo"
   | "politica"
   | "internacional"
-  | "comunidad";
+  | "comunidad"
+  | "asociaciones"
+  | "mercado"
+  | "cultura"
+  | "eventos"
+  | "estudios"
+  | "tendencias";
 
 export interface Noticia {
   id: string;
@@ -118,9 +124,71 @@ export const MOCK_NOTICIAS: Noticia[] = [
     titulo: "La Cannaval de Barcelona espera 20.000 asistentes en su edición de primavera",
     extracto:
       "El evento de la cultura cannábica más grande de España vuelve a la ciudad condal con exposición de variedades, ponencias de expertos, talleres de cultivo y zona de showcooking cannábica.",
-    categoria: "comunidad",
+    categoria: "eventos",
     fuente: "WeedConnect",
     fecha: "2024-01-03",
+  },
+  {
+    id: "11",
+    slug: "thai-legaliza-cannabis-recreativo-asia",
+    titulo: "Tailandia da marcha atrás: debate sobre la re-penalización del cannabis",
+    extracto:
+      "Tras ser el primer país asiático en legalizar el cannabis medicinal, el nuevo gobierno tailandés debate revertir parcialmente la normativa entre tensiones políticas y presión internacional.",
+    categoria: "internacional",
+    fuente: "Reuters / Redacción",
+    fecha: "2024-03-28",
+    destacada: true,
+  },
+  {
+    id: "12",
+    slug: "asociaciones-espana-cifras-2024",
+    titulo: "Más de 1.200 asociaciones cannábicas activas en España según nuevo informe",
+    extracto:
+      "Un estudio publicado por el Instituto de Política de Drogas contabiliza las asociaciones activas por CCAA. Cataluña lidera con 380, seguida de País Vasco y Madrid. El informe destaca el vacío legal autonómico.",
+    categoria: "asociaciones",
+    fuente: "Instituto de Política de Drogas",
+    fecha: "2024-02-10",
+  },
+  {
+    id: "13",
+    slug: "mercado-legal-cannabis-europa-2025",
+    titulo: "El mercado legal de cannabis en Europa podría superar los 3.200 millones de euros en 2025",
+    extracto:
+      "Un análisis de mercado prevé un crecimiento exponencial del sector cannábico legal europeo, impulsado por la legalización alemana y los avances en cannabis medicinal en Francia y Reino Unido.",
+    categoria: "mercado",
+    fuente: "Prohibition Partners / Redacción",
+    fecha: "2024-01-20",
+  },
+  {
+    id: "14",
+    slug: "cultura-cannabica-musica-hip-hop",
+    titulo: "El hip-hop y la cultura cannábica: 50 años de una relación indivisible",
+    extracto:
+      "Desde Cypress Hill hasta Kendrick Lamar, la cultura hip-hop y el cannabis han caminado de la mano. Un repaso cultural a cómo la música urbana normalizó la conversación sobre el cannabis mucho antes de la política.",
+    categoria: "cultura",
+    fuente: "WeedConnect",
+    fecha: "2024-03-10",
+    destacada: true,
+  },
+  {
+    id: "15",
+    slug: "estudio-cannabis-ansiedad-jóvenes",
+    titulo: "Nuevo estudio alerta sobre el consumo temprano y el riesgo de ansiedad en jóvenes",
+    extracto:
+      "Investigadores de la Universidad Complutense analizan datos de 2.000 jóvenes de 16 a 24 años y concluyen que el inicio del consumo antes de los 18 años se asocia con un mayor riesgo de episodios de ansiedad. La edad y la dosis importan.",
+    categoria: "estudios",
+    fuente: "UCM / Redacción",
+    fecha: "2024-04-05",
+  },
+  {
+    id: "16",
+    slug: "tendencias-vaporizadores-2024",
+    titulo: "El vaporizador supera al porro en preferencia entre nuevos consumidores adultos en España",
+    extracto:
+      "Una encuesta realizada por WeedConnect entre 3.500 usuarios adultos revela que el 54% de quienes empezaron a consumir en los últimos 3 años prefieren el vaporizador frente al papel. La reducción de daños y la discreción son los motivos principales.",
+    categoria: "tendencias",
+    fuente: "WeedConnect",
+    fecha: "2024-04-12",
   },
 ];
 
@@ -131,19 +199,25 @@ export const CATEGORIA_LABEL: Record<NoticiaCategoria, string> = {
   politica: "Política",
   internacional: "Internacional",
   comunidad: "Comunidad",
+  asociaciones: "Asociaciones",
+  mercado: "Mercado",
+  cultura: "Cultura",
+  eventos: "Eventos",
+  estudios: "Estudios",
+  tendencias: "Tendencias",
 };
 
 export const CATEGORIA_COLOR: Record<NoticiaCategoria, string> = {
-  legal:
-    "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200",
-  ciencia:
-    "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200",
-  cultivo:
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
-  politica:
-    "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200",
-  internacional:
-    "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
-  comunidad:
-    "bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-200",
+  legal: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200",
+  ciencia: "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-200",
+  cultivo: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
+  politica: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200",
+  internacional: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
+  comunidad: "bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-200",
+  asociaciones: "bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-200",
+  mercado: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200",
+  cultura: "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200",
+  eventos: "bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-200",
+  estudios: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200",
+  tendencias: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-200",
 };

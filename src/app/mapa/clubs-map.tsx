@@ -15,6 +15,8 @@ const CATEGORY_COLORS: Record<SpotCategory, string> = {
   banco: "#f59e0b",     // amber-500
   playa: "#06b6d4",     // cyan-500
   spot_relax: "#6366f1", // indigo-500
+  comida: "#f97316",    // orange-500
+  noche: "#8b5cf6",     // violet-500
   otro: "#64748b",      // slate-500
 };
 
@@ -25,18 +27,22 @@ const CATEGORY_LABEL: Record<SpotCategory, string> = {
   banco: "Banco chill",
   playa: "Playa / Cala",
   spot_relax: "Zona relax",
+  comida: "Comida",
+  noche: "Noche / Bar",
   otro: "Punto de interés",
 };
 
 // Iconos internos por categoría (SVG paths estándar 24x24)
 const CATEGORY_INNER_ICONS: Record<SpotCategory, string> = {
-  asociacion: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor"/>`, // Escudo / Shield
-  mirador: `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="currentColor"/>`, // Ojo / Eye
-  parque: `<path d="M12 2L3 15h6v7h6v-7h6z" fill="currentColor"/>`, // Árbol / Pine Tree
-  banco: `<path d="M3 9h18v3H3zm2-5h14v3H5zm-4 9v8h3v-6h12v6h3v-8H1z" fill="currentColor"/>`, // Banco / Bench
-  playa: `<path d="M2 18c4 0 4-3 8-3s4 3 8 3 4-3 8-3v4H2v-4z" fill="currentColor"/><circle cx="8" cy="7" r="4" fill="currentColor"/>`, // Olas y Sol / Waves & Sun
-  spot_relax: `<path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zm0-15a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="currentColor"/>`, // Mandala / Zen
-  otro: `<circle cx="12" cy="12" r="6" fill="currentColor"/>`
+  asociacion: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor"/>`,
+  mirador: `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="currentColor"/>`,
+  parque: `<path d="M12 2L3 15h6v7h6v-7h6z" fill="currentColor"/>`,
+  banco: `<path d="M3 9h18v3H3zm2-5h14v3H5zm-4 9v8h3v-6h12v6h3v-8H1z" fill="currentColor"/>`,
+  playa: `<path d="M2 18c4 0 4-3 8-3s4 3 8 3 4-3 8-3v4H2v-4z" fill="currentColor"/><circle cx="8" cy="7" r="4" fill="currentColor"/>`,
+  spot_relax: `<path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zm0-15a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="currentColor"/>`,
+  comida: `<path d="M18 2h-2v7h-2V2h-2v7a4 4 0 0 0 3 3.87V22h2v-9.13A4 4 0 0 0 18 9V2zM5 2v10h3v10h2V2H5z" fill="currentColor"/>`,
+  noche: `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/>`,
+  otro: `<circle cx="12" cy="12" r="6" fill="currentColor"/>`,
 };
 
 // Generador de pines dinámicos mediante SVG embebido
@@ -181,6 +187,11 @@ export function ClubsMap({ clubs }: { clubs: Club[] }) {
                   ) : (
                     <p className="m-0 pt-1 text-[9px] font-semibold uppercase tracking-wide text-sky-600 dark:text-sky-400">
                       🌳 Acceso libre
+                    </p>
+                  )}
+                  {(c.category === "comida" || c.category === "noche" || c.category === "mirador" || c.category === "parque" || c.category === "playa" || c.category === "banco" || c.category === "spot_relax") && (
+                    <p className="m-0 pt-1 text-[9px] text-muted-foreground italic">
+                      ℹ️ Información orientativa. Respeta la normativa local.
                     </p>
                   )}
                 </div>
