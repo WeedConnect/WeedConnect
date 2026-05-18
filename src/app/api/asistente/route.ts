@@ -1,9 +1,11 @@
 import { NextRequest } from "next/server";
-import { streamText, tool, stepCountIs } from "ai";
+import { streamText, tool, stepCountIs, createUIMessageStreamResponse, type UIMessageChunk } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 import { MOCK_STRAINS } from "@/data/strains";
 import { getClubs } from "@/lib/clubs";
+import { createClient } from "@/lib/supabase/server";
+import type { Strain } from "@/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
@@ -22,50 +24,115 @@ Tus funciones principales son:
 - Ante dudas médicas serias, recomienda con empatía visitar a un profesional sanitario.
 - Responde en Markdown limpio, utilizando negritas, listas, tablas y emojis (⚖️, 🌿, 📜, 🔒) cuando sea útil para que sea súper fácil de leer.`;
 
+const isSupabaseConfigured =
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+async function findStrains(
+  query?: string,
+  tipo?: "indica" | "sativa" | "hybrid",
+): Promise<Strain[]> {
+  if (isSupabaseConfigured) {
+    try {
+      const supabase = await createClient();
+      let req = supabase
+        .from("strains")
+        .select("id, name, slug, type, thc_pct, cbd_pct, flavors, effects, description, image_url");
+
+      if (tipo) req = req.eq("type", tipo);
+      if (query) req = req.ilike("name", `%${query}%`);
+
+      const { data, error } = await req.limit(4);
+
+      if (!error && data && data.length > 0) {
+        return data.map(
+          (s): Strain => ({
+            id: s.id,
+            name: s.name,
+            slug: s.slug,
+            type: s.type as Strain["type"],
+            thcPct: s.thc_pct ?? undefined,
+            cbdPct: s.cbd_pct ?? undefined,
+            flavors: Array.isArray(s.flavors) ? s.flavors : [],
+            effects: Array.isArray(s.effects) ? s.effects : [],
+            description: s.description ?? "",
+            imageUrl: s.image_url ?? undefined,
+          }),
+        );
+      }
+    } catch (e) {
+      console.error("[asistente] Error buscando strains en Supabase:", e);
+    }
+  }
+
+  // Fallback a mock data con filtros aplicados en memoria
+  let res = MOCK_STRAINS;
+  if (tipo) res = res.filter((s) => s.type === tipo);
+  if (query) {
+    const q = query.toLowerCase();
+    res = res.filter(
+      (s) =>
+        s.name.toLowerCase().includes(q) ||
+        s.effects.some((e) => e.toLowerCase().includes(q)) ||
+        s.flavors.some((f) => f.toLowerCase().includes(q)),
+    );
+  }
+  return res.slice(0, 4);
+}
+
+function makeFallbackStream(text: string): ReadableStream<UIMessageChunk> {
+  return new ReadableStream<UIMessageChunk>({
+    start(controller) {
+      const id = "fallback-1";
+      controller.enqueue({ type: "start", messageId: "fallback-msg" });
+      controller.enqueue({ type: "start-step" });
+      controller.enqueue({ type: "text-start", id });
+      controller.enqueue({ type: "text-delta", id, delta: text });
+      controller.enqueue({ type: "text-end", id });
+      controller.enqueue({ type: "finish-step" });
+      controller.enqueue({ type: "finish", finishReason: "stop" });
+      controller.close();
+    },
+  });
+}
+
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: "Falta ANTHROPIC_API_KEY." }), { status: 503 });
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return createUIMessageStreamResponse({
+      stream: makeFallbackStream(
+        "El asistente está echándose una siesta 💤\n\nFalta configurar la `ANTHROPIC_API_KEY` en el entorno del servidor. Añádela a tu archivo `.env.local` para empezar a charlar con **Bud**.",
+      ),
+    });
   }
 
   const { messages } = await req.json();
 
   const result = streamText({
-    model: anthropic("claude-3-5-sonnet-20241022"),
+    model: anthropic("claude-sonnet-4-6"),
     messages,
     system: SYSTEM_PROMPT,
     stopWhen: stepCountIs(5),
     tools: {
       buscarVariedades: tool({
-        description: "Busca cepas/strains en WeedConnect por texto libre (nombre, sabor, efecto) y tipo (indica, sativa, hybrid).",
+        description:
+          "Busca cepas/strains en WeedConnect por texto libre (nombre, sabor, efecto) y tipo (indica, sativa, hybrid).",
         inputSchema: z.object({
           query: z.string().optional().describe("Palabra clave a buscar"),
-          tipo: z.enum(["indica", "sativa", "hybrid"]).optional().describe("Tipo de variedad"),
+          tipo: z
+            .enum(["indica", "sativa", "hybrid"])
+            .optional()
+            .describe("Tipo de variedad"),
         }),
-        execute: async ({ query, tipo }: { query?: string; tipo?: "indica" | "sativa" | "hybrid" }) => {
-          let res = MOCK_STRAINS;
-          if (tipo) res = res.filter((s) => s.type === tipo);
-          if (query) {
-            const q = query.toLowerCase();
-            res = res.filter(
-              (s) =>
-                s.name.toLowerCase().includes(q) ||
-                s.effects.some((e) => e.toLowerCase().includes(q)) ||
-                s.flavors.some((f) => f.toLowerCase().includes(q)),
-            );
-          }
-          return res.slice(0, 4);
-        },
+        execute: async ({ query, tipo }) => findStrains(query, tipo),
       }),
       buscarClubes: tool({
         description: "Encuentra asociaciones y clubes cannábicos por ciudad.",
         inputSchema: z.object({
           ciudad: z.string().describe("Ciudad para buscar (ej. Barcelona, Madrid)"),
         }),
-        execute: async ({ ciudad }: { ciudad: string }) => {
-          const c = ciudad.toLowerCase();
+        execute: async ({ ciudad }) => {
           const clubs = await getClubs();
-          return clubs.filter((club) => club.city.toLowerCase().includes(c)).slice(0, 4);
+          return clubs.filter((c) => c.city.toLowerCase().includes(ciudad.toLowerCase())).slice(0, 4);
         },
       }),
     },
@@ -73,4 +140,3 @@ export async function POST(req: NextRequest) {
 
   return result.toUIMessageStreamResponse();
 }
-

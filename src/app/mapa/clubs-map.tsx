@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useState, useMemo, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { MapPin } from "lucide-react";
 import type { Club, SpotCategory } from "@/types";
 import { cn } from "@/lib/utils";
+import { ProposeSpotModal } from "@/components/map/propose-spot-modal";
 
 // Colores por categoría (HEX)
 const CATEGORY_COLORS: Record<SpotCategory, string> = {
@@ -30,62 +32,106 @@ const CATEGORY_LABEL: Record<SpotCategory, string> = {
 
 // Iconos internos por categoría (SVG paths estándar 24x24)
 const CATEGORY_INNER_ICONS: Record<SpotCategory, string> = {
-  asociacion: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor"/>`, // Escudo / Shield
-  mirador: `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="currentColor"/>`, // Ojo / Eye
-  parque: `<path d="M12 2L3 15h6v7h6v-7h6z" fill="currentColor"/>`, // Árbol / Pine Tree
-  banco: `<path d="M3 9h18v3H3zm2-5h14v3H5zm-4 9v8h3v-6h12v6h3v-8H1z" fill="currentColor"/>`, // Banco / Bench
-  playa: `<path d="M2 18c4 0 4-3 8-3s4 3 8 3 4-3 8-3v4H2v-4z" fill="currentColor"/><circle cx="8" cy="7" r="4" fill="currentColor"/>`, // Olas y Sol / Waves & Sun
-  spot_relax: `<path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zm0-15a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="currentColor"/>`, // Mandala / Zen
-  otro: `<circle cx="12" cy="12" r="6" fill="currentColor"/>`
+  asociacion: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="currentColor"/>`,
+  mirador: `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="currentColor"/>`,
+  parque: `<path d="M12 2L3 15h6v7h6v-7h6z" fill="currentColor"/>`,
+  banco: `<path d="M3 9h18v3H3zm2-5h14v3H5zm-4 9v8h3v-6h12v6h3v-8H1z" fill="currentColor"/>`,
+  playa: `<path d="M2 18c4 0 4-3 8-3s4 3 8 3 4-3 8-3v4H2v-4z" fill="currentColor"/><circle cx="8" cy="7" r="4" fill="currentColor"/>`,
+  spot_relax: `<path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18zm0-15a6 6 0 1 0 0 12 6 6 0 0 0 0-12z" fill="currentColor"/>`,
+  otro: `<circle cx="12" cy="12" r="6" fill="currentColor"/>`,
 };
 
-// Generador de pines dinámicos mediante SVG embebido
 function createSpotIcon(category: SpotCategory) {
   const color = CATEGORY_COLORS[category] || CATEGORY_COLORS.otro;
   const innerIcon = CATEGORY_INNER_ICONS[category] || CATEGORY_INNER_ICONS.otro;
-  
+
   const html = `
     <div style="filter: drop-shadow(0px 3px 4px rgba(0,0,0,0.3));">
       <svg width="36" height="44" viewBox="0 0 24 29" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Pin de fondo -->
         <path d="M12 0C5.37 0 0 5.37 0 12C0 21 12 29 12 29C12 29 24 21 24 12C24 5.37 18.63 0 12 0Z" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
-        <!-- Círculo blanco central -->
         <circle cx="12" cy="12" r="7" fill="#ffffff"/>
-        <!-- Icono a color escalado y centrado -->
         <g transform="translate(6, 6) scale(0.5)" style="color: ${color};">
           ${innerIcon}
         </g>
       </svg>
     </div>
   `;
-  
+
   return L.divIcon({
     className: "custom-spot-marker",
-    html: html,
+    html,
     iconSize: [36, 44],
     iconAnchor: [18, 44],
     popupAnchor: [0, -40],
   });
 }
 
+// Captura clics del mapa cuando el modo selección está activo
+function MapClickHandler({
+  active,
+  onMapClick,
+}: {
+  active: boolean;
+  onMapClick: (lat: number, lng: number) => void;
+}) {
+  useMapEvents({
+    click(e) {
+      if (active) onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
 export function ClubsMap({ clubs }: { clubs: Club[] }) {
   const [activeCategory, setActiveCategory] = useState<SpotCategory | "todos">("todos");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [pendingCoords, setPendingCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  // Filtrado reactivo
+  // Detecta sesión activa usando el cliente browser de Supabase
+  useEffect(() => {
+    const supabaseConfigured = !!(
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
+    if (!supabaseConfigured) return;
+
+    // Importación dinámica para no romper si Supabase no está configurado
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      const supabase = createClient();
+
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setIsLoggedIn(!!session);
+      });
+
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_, session) => {
+        setIsLoggedIn(!!session);
+      });
+
+      return () => subscription.unsubscribe();
+    });
+  }, []);
+
+  function handleMapClick(lat: number, lng: number) {
+    setPendingCoords({ lat, lng });
+    setSelectionMode(false);
+    setModalOpen(true);
+  }
+
+  function handleModalClose() {
+    setModalOpen(false);
+    setPendingCoords(null);
+  }
+
   const filteredClubs = useMemo(() => {
     if (activeCategory === "todos") return clubs;
-    return clubs.filter(c => c.category === activeCategory);
+    return clubs.filter((c) => c.category === activeCategory);
   }, [clubs, activeCategory]);
 
-  // Centro inicial basado en TODOS los clubes para no descolocar al filtrar
-  const center: [number, number] = useMemo(() => {
-    return clubs.length
-      ? [
-          clubs.reduce((sum, c) => sum + c.lat, 0) / clubs.length,
-          clubs.reduce((sum, c) => sum + c.lng, 0) / clubs.length,
-        ]
-      : [40.4168, -3.7038];
-  }, [clubs]);
+  const center: [number, number] = [48.5, 10];
 
   return (
     <div className="flex flex-col gap-4 w-full">
@@ -102,7 +148,7 @@ export function ClubsMap({ clubs }: { clubs: Club[] }) {
         >
           🌍 Todos los spots
         </button>
-        
+
         {(Object.keys(CATEGORY_LABEL) as SpotCategory[]).map((cat) => {
           const isActive = activeCategory === cat;
           const color = CATEGORY_COLORS[cat];
@@ -122,7 +168,7 @@ export function ClubsMap({ clubs }: { clubs: Club[] }) {
                   : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground border-border/60"
               )}
             >
-              <span 
+              <span
                 className="size-2 rounded-full inline-block shrink-0"
                 style={{ backgroundColor: isActive ? "#ffffff" : color }}
               />
@@ -133,12 +179,41 @@ export function ClubsMap({ clubs }: { clubs: Club[] }) {
       </div>
 
       {/* Contenedor del Mapa */}
-      <div className="h-[70vh] min-h-[480px] w-full overflow-hidden rounded-lg border border-border shadow-md relative">
-        <MapContainer center={center} zoom={6} className="size-full" scrollWheelZoom>
+      <div
+        className={cn(
+          "h-[70vh] min-h-[480px] w-full overflow-hidden rounded-lg border border-border shadow-md relative",
+          selectionMode && "[&_.leaflet-container]:cursor-crosshair"
+        )}
+      >
+        {/* Banner de modo selección */}
+        {selectionMode && (
+          <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 z-[1000] rounded-full bg-amber-500/95 px-5 py-2 text-sm font-semibold text-white shadow-lg backdrop-blur-sm whitespace-nowrap">
+            📍 Haz clic en el mapa para ubicar el spot
+          </div>
+        )}
+
+        {/* Botón flotante — solo para usuarios autenticados */}
+        {isLoggedIn && (
+          <button
+            onClick={() => setSelectionMode((prev) => !prev)}
+            className={cn(
+              "absolute bottom-6 right-4 z-[1000] flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold shadow-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              selectionMode
+                ? "bg-amber-500 text-white hover:bg-amber-600 active:bg-amber-700"
+                : "bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800"
+            )}
+          >
+            <MapPin className="size-4" />
+            {selectionMode ? "Cancelar" : "Proponer Spot"}
+          </button>
+        )}
+
+        <MapContainer center={center} zoom={4} className="size-full" scrollWheelZoom>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
+          <MapClickHandler active={selectionMode} onMapClick={handleMapClick} />
           {filteredClubs.map((c) => (
             <Marker key={c.id} position={[c.lat, c.lng]} icon={createSpotIcon(c.category)}>
               <Popup>
@@ -146,8 +221,8 @@ export function ClubsMap({ clubs }: { clubs: Club[] }) {
                   <div className="flex items-center justify-between gap-2 border-b border-border pb-1">
                     <p className="m-0 font-semibold text-foreground">{c.name}</p>
                   </div>
-                  
-                  <span 
+
+                  <span
                     className="inline-block rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-white"
                     style={{ backgroundColor: CATEGORY_COLORS[c.category] }}
                   >
@@ -166,8 +241,11 @@ export function ClubsMap({ clubs }: { clubs: Club[] }) {
 
                   {c.tags && c.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 pt-1">
-                      {c.tags.map(tag => (
-                        <span key={tag} className="rounded bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground">
+                      {c.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded bg-muted px-1.5 py-0.5 text-[9px] font-medium text-muted-foreground"
+                        >
                           #{tag}
                         </span>
                       ))}
@@ -189,7 +267,16 @@ export function ClubsMap({ clubs }: { clubs: Club[] }) {
           ))}
         </MapContainer>
       </div>
+
+      {/* Modal de propuesta de spot */}
+      {pendingCoords && (
+        <ProposeSpotModal
+          open={modalOpen}
+          lat={pendingCoords.lat}
+          lng={pendingCoords.lng}
+          onClose={handleModalClose}
+        />
+      )}
     </div>
   );
 }
-

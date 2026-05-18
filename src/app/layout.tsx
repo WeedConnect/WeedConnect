@@ -5,6 +5,7 @@ import "./globals.css";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta-sans",
@@ -82,6 +83,7 @@ export default function RootLayout({
           <Navbar />
           <main className="flex flex-1 flex-col">{children}</main>
           <Footer />
+          <Toaster richColors position="bottom-right" />
         </ThemeProvider>
 
         {/* Analytics — solo carga si NEXT_PUBLIC_PLAUSIBLE_DOMAIN está definido */}

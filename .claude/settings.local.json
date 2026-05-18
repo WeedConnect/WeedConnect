@@ -11,7 +11,19 @@
       "Bash(pnpm add *)",
       "Bash(pnpm lint *)",
       "Bash(pnpm build *)",
-      "Bash(pnpm dev *)"
+      "Bash(pnpm dev *)",
+      "Bash(pnpm run *)",
+      "Bash(git --no-pager grep -n -i -E \"social-photos|social_posts|media_urls|storage\\\\.|bucket\" -- supabase/migrations/0001_init.sql)",
+      "Bash(git add *)",
+      "Bash(git commit -m '@ *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const p = require\\('./node_modules/ai/package.json'\\); console.log\\('ai:', p.version\\)\")",
+      "Bash(node -e \"const p = require\\('./node_modules/@ai-sdk/react/package.json'\\); console.log\\('@ai-sdk/react:', p.version\\)\")",
+      "Bash(node -e \"const ai = require\\('ai'\\); console.log\\(Object.keys\\(ai\\).filter\\(k => k.includes\\('Stream'\\) || k.includes\\('Data'\\) || k.includes\\('simulate'\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const ai = require\\('@ai-sdk/react'\\); console.log\\(Object.keys\\(ai\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const { createUIMessageStreamResponse } = require\\('ai'\\); console.log\\(typeof createUIMessageStreamResponse\\)\")"
     ]
   }
 }

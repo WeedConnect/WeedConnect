@@ -12,6 +12,7 @@ import { Image as ImageIcon, X } from "lucide-react";
 import type { ForumCategory } from "@/lib/forum";
 
 const MAX_PHOTOS = 4;
+const LOCAL_KEY = "wc_local_threads";
 
 function slugify(text: string): string {
   return text
@@ -28,14 +29,26 @@ interface SelectedFile {
   preview: string;
 }
 
+export interface LocalThread {
+  id: string;
+  slug: string;
+  title: string;
+  body: string;
+  created_at: string;
+  category_name: string;
+  category_slug: string;
+}
+
 export function NewThreadForm({
   categories,
   userId,
 }: {
   categories: ForumCategory[];
-  userId: string;
+  userId: string | null;
 }) {
   const router = useRouter();
+  const isDemo = userId === null;
+
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -82,12 +95,31 @@ export function NewThreadForm({
     setError("");
 
     const slug = slugify(title);
-    const supabase = createClient();
 
+    // Modo demo: guardar en localStorage
+    if (isDemo) {
+      const category = categories.find((c) => c.id === categoryId);
+      const thread: LocalThread = {
+        id: crypto.randomUUID(),
+        slug,
+        title: title.trim(),
+        body: body.trim(),
+        created_at: new Date().toISOString(),
+        category_name: category?.name ?? "",
+        category_slug: category?.slug ?? "",
+      };
+      const existing: LocalThread[] = JSON.parse(localStorage.getItem(LOCAL_KEY) ?? "[]");
+      localStorage.setItem(LOCAL_KEY, JSON.stringify([thread, ...existing]));
+      router.push(`/comunidad/foro/${slug}`);
+      return;
+    }
+
+    // Modo Supabase
+    const supabase = createClient();
     try {
       const mediaUrls: string[] = [];
       for (const { file } of photos) {
-        const path = await uploadImage(supabase, "forum-photos", userId, file);
+        const path = await uploadImage(supabase, "forum-photos", userId!, file);
         mediaUrls.push(publicImageUrl(supabase, "forum-photos", path));
       }
 
@@ -161,61 +193,63 @@ export function NewThreadForm({
         />
       </div>
 
-      {/* Fotos adjuntas */}
-      <div className="space-y-2">
-        <Label>Fotos (opcional)</Label>
-        {photos.length > 0 && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {photos.map((item, idx) => (
-              <div
-                key={idx}
-                className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.preview} alt="Vista previa" className="h-full w-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => removePhoto(idx)}
-                  disabled={loading}
-                  className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-full bg-black/60 text-white"
-                  aria-label="Quitar foto"
+      {/* Fotos adjuntas — solo con Supabase */}
+      {!isDemo && (
+        <div className="space-y-2">
+          <Label>Fotos (opcional)</Label>
+          {photos.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {photos.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
                 >
-                  <X className="size-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          disabled={loading || photos.length >= MAX_PHOTOS}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={loading || photos.length >= MAX_PHOTOS}
-          onClick={() => fileInputRef.current?.click()}
-          className="gap-1.5"
-        >
-          <ImageIcon className="size-4" />
-          Añadir fotos
-        </Button>
-        <p className="text-xs text-muted-foreground">
-          Hasta {MAX_PHOTOS} imágenes · JPG, PNG, WEBP o GIF · máx. 5 MB cada una.
-        </p>
-      </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={item.preview} alt="Vista previa" className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(idx)}
+                    disabled={loading}
+                    className="absolute right-1.5 top-1.5 flex size-6 items-center justify-center rounded-full bg-black/60 text-white"
+                    aria-label="Quitar foto"
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            disabled={loading || photos.length >= MAX_PHOTOS}
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            disabled={loading || photos.length >= MAX_PHOTOS}
+            onClick={() => fileInputRef.current?.click()}
+            className="gap-1.5"
+          >
+            <ImageIcon className="size-4" />
+            Añadir fotos
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Hasta {MAX_PHOTOS} imágenes · JPG, PNG, WEBP o GIF · máx. 5 MB cada una.
+          </p>
+        </div>
+      )}
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex gap-3">
         <Button type="submit" disabled={loading || !title.trim() || !body.trim()}>
-          {loading ? "Publicando…" : "Publicar hilo"}
+          {loading ? "Publicando…" : isDemo ? "Guardar localmente" : "Publicar hilo"}
         </Button>
         <Button
           type="button"

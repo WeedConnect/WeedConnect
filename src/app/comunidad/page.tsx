@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MessageSquare, Calendar, BookOpen, Mic, ChefHat, Users } from "lucide-react";
+import { MessageSquare, Calendar, BookOpen, Mic, ChefHat, Users, Radio } from "lucide-react";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const metadata: Metadata = {
@@ -14,6 +14,12 @@ export const metadata: Metadata = {
 };
 
 const SECTIONS = [
+  {
+    href: "/comunidad/chat",
+    title: "Chat en vivo",
+    description: "Sala de chat grupal en tiempo real. Conecta con la comunidad ahora mismo.",
+    icon: Radio,
+  },
   {
     href: "/comunidad/foro",
     title: "Foro",

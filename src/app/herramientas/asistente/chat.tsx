@@ -21,7 +21,7 @@ const SUGERENCIAS = [
 
 export function AsistenteChat({ available }: { available: boolean }) {
   const [inputValue, setInputValue] = useState("");
-  const { messages, status, sendMessage } = useChat({
+  const { messages, status, error, sendMessage } = useChat({
     transport: new DefaultChatTransport({ api: "/api/asistente" }),
   });
 
@@ -29,6 +29,7 @@ export function AsistenteChat({ available }: { available: boolean }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isBusy = status === "submitted" || status === "streaming";
+  const hasError = status === "error" && !!error;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -223,6 +224,15 @@ export function AsistenteChat({ available }: { available: boolean }) {
             </div>
           );
         })}
+
+        {hasError && (
+          <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm dark:border-red-800 dark:bg-red-950/30">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-red-600" />
+            <span className="text-red-800 dark:text-red-200">
+              Error de conexión con el asistente. Comprueba tu conexión e inténtalo de nuevo.
+            </span>
+          </div>
+        )}
 
         <div ref={bottomRef} />
       </div>

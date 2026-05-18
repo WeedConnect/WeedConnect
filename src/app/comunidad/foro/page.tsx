@@ -42,15 +42,13 @@ export default async function ForoPage({
             Discusiones de la comunidad cannábica.
           </p>
         </div>
-        {user && (
-          <Link
-            href="/comunidad/foro/nuevo"
-            className={cn(buttonVariants({ size: "sm" }), "gap-1.5")}
-          >
-            <PenSquare className="size-4" />
-            Nuevo hilo
-          </Link>
-        )}
+        <Link
+          href={user ? "/comunidad/foro/nuevo" : "/auth/login?next=/comunidad/foro/nuevo"}
+          className={cn(buttonVariants({ size: "sm" }), "gap-1.5")}
+        >
+          <PenSquare className="size-4" />
+          Nuevo hilo
+        </Link>
       </header>
 
       <ForumCategoryTabs categories={categories} active={categoria} />

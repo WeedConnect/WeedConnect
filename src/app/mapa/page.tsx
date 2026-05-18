@@ -3,13 +3,13 @@ import { getClubs } from "@/lib/clubs";
 import { MapView } from "./map-view";
 
 export const metadata: Metadata = {
-  title: "Mapa Colaborativo WeedConnect",
+  title: "Mapa Colaborativo Europa · WeedConnect",
   description:
-    "Encuentra asociaciones legales y los mejores sitios (spots) chill para relajarte: miradores, parques y zonas con vistas. Datos de la comunidad.",
+    "Encuentra asociaciones cannábicas y clubs sociales en España y Europa. Alemania, Países Bajos, Portugal, Suiza, Bélgica, Malta y más. Más spots chill: miradores, parques y playas.",
   openGraph: {
-    title: "Mapa Colaborativo · WeedConnect",
-    description: "Asociaciones cannábicas, miradores, parques y spots chill. Datos colaborativos de la comunidad.",
-    images: [{ url: `/api/og?title=${encodeURIComponent("Mapa Colaborativo")}&description=${encodeURIComponent("Asociaciones cannábicas, spots chill y miradores. Datos de la comunidad.")}`, width: 1200, height: 630 }],
+    title: "Mapa Cannábico Europa · WeedConnect",
+    description: "Clubs sociales cannábicos en España y Europa. Alemania, Países Bajos, Portugal, Suiza, Malta y más. Spots chill para relajarse.",
+    images: [{ url: `/api/og?title=${encodeURIComponent("Mapa Europa")}&description=${encodeURIComponent("Clubs cannábicos y spots chill en toda Europa. Comunidad WeedConnect.")}`, width: 1200, height: 630 }],
   },
 };
 
@@ -21,8 +21,8 @@ export default async function MapaPage() {
       <header>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Mapa Colaborativo</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Descubre asociaciones legales, miradores con buenas vistas, bancos tranquilos y rincones
-          mágicos para relajarte con amigos. Pulsa cualquier marcador para ver los detalles y etiquetas comunitarias.
+          Clubs sociales cannábicos y spots chill en España y Europa. Alemania, Países Bajos,
+          Portugal, Suiza, Malta, Bélgica y más. Pulsa cualquier marcador para ver detalles, etiquetas y situación legal local.
         </p>
       </header>
 

@@ -4,40 +4,27 @@ Estos son los pasos que requieren tu intervención (cuentas externas, dinero, de
 
 ## 1. Supabase (BLOQUEANTE para casi todo el backend)
 
-1. Crea cuenta gratis en https://supabase.com (puedes usar tu cuenta de GitHub).
-2. **Crear proyecto nuevo**:
+1. [x] **Crea cuenta gratis** en https://supabase.com (puedes usar tu cuenta de GitHub).
+2. [x] **Crear proyecto nuevo**:
    - Name: `weedconnect`
    - Region: `Europe (Frankfurt)` (más cercana)
-   - Database password: genera una fuerte y guárdala (no se puede recuperar fácilmente).
-3. **Habilitar extensiones**: ve a `Database → Extensions` y activa:
+   - Database password: genera una fuerte y guárdala.
+3. [x] **Habilitar extensiones**: ve a `Database → Extensions` y activa:
    - `postgis` (geolocalización del mapa)
    - `pgcrypto` (UUIDs — normalmente ya está)
-4. **Ejecutar la migración**: copia el contenido de `supabase/migrations/0001_init.sql` y pégalo en `SQL Editor → New query → Run`. Luego haz lo mismo con `supabase/seed.sql` para los datos de ejemplo. *(Nota: El archivo incluye un parche crítico de seguridad del `SecurityAgent` para evitar escalada de roles y el esquema del **Muro Social / Feed**).* Si ya aplicaste la migración inicial previamente, solo debes ejecutar la sección final de `0001_init.sql` dedicada al **SOCIAL FEED**.
-
-   **Actualización (subida de fotos avatar/foro/grow):** si ya aplicaste la
-   migración antes de esta versión, re-ejecuta el bloque final
-   "STORAGE — políticas de `avatars`, `forum-photos`, `grow-photos`" de
-   `0001_init.sql` (incluye también el `alter table forum_threads ... media_urls`,
-   que es idempotente). Si ves errores `policy already exists`, es que esa
-   política ya estaba — puedes ignorarlos.
-5. **Crear storage buckets**: en `Storage → New bucket`, crea (en todos, límite
-   de tamaño `5 MB` y MIME types `image/jpeg, image/png, image/webp, image/gif`):
+4. [x] **Ejecutar la migración**: copia el contenido de `supabase/migrations/0001_init.sql` y pégalo en `SQL Editor → New query → Run`. Luego haz lo mismo con `supabase/seed.sql` para los datos de ejemplo. *(Nota: El archivo incluye un parche crítico de seguridad del `SecurityAgent` para evitar escalada de roles y el esquema del **Muro Social / Feed**).* Si ya aplicaste la migración inicial previamente, solo debes ejecutar la sección final de `0001_init.sql` dedicada al **SOCIAL FEED**.
+   - [ ] **Migración de gamificación**: ejecuta también `supabase/migrations/0002_gamification_triggers.sql` en el SQL Editor. Este archivo instala los triggers que actualizan `profiles.points` automáticamente cada vez que un usuario crea/borra hilos, respuestas, posts sociales, comentarios, cultivos, entradas de cultivo y votos.
+5. [x] **Crear storage buckets**: en `Storage → New bucket`, crea (en todos, límite de tamaño `5 MB` y MIME types `image/jpeg, image/png, image/webp, image/gif`):
    - `avatars` (público — fotos de perfil)
    - `strain-photos` (público)
-   - `grow-photos` (**privado** — fotos del diario de cultivo; se sirven con
-     signed URLs, solo las ve el dueño)
+   - `grow-photos` (**privado** — fotos del diario de cultivo; se sirven con signed URLs, solo las ve el dueño)
    - `forum-photos` (público — fotos de los hilos del foro)
-   - `social-photos` (público — fotos del Muro Social). Al crearlo, en las
-     opciones del bucket activa **"Restrict file size"** = `5 MB` y en
-     **"Allowed MIME types"** pon: `image/jpeg, image/png, image/webp, image/gif`.
-     Las políticas RLS de este bucket (SELECT público, INSERT/DELETE solo del
-     dueño) **ya están en `0001_init.sql`** — si aplicaste la migración antes
-     de este cambio, re-ejecuta el bloque final "STORAGE — políticas del
-     bucket `social-photos`".
-6. **Copiar credenciales**: ve a `Project Settings → API` y copia:
+   - `social-photos` (público — fotos del Muro Social).
+   *(Nota: ¡Ya los hemos creado e insertado en minúsculas y con la configuración correcta de seguridad en tu base de datos! Si aún tienes los buckets antiguos en mayúsculas en tu panel de Supabase, puedes borrarlos directamente en la pestaña Storage).*
+6. [x] **Copiar credenciales**: ve a `Project Settings → API` y copia:
    - Project URL
    - `anon` public key
-7. **Rellenar `.env.local`** en la raíz del proyecto:
+7. [x] **Rellenar `.env.local`** en la raíz del proyecto:
    ```
    cp .env.local.example .env.local
    ```
@@ -46,7 +33,7 @@ Estos son los pasos que requieren tu intervención (cuentas externas, dinero, de
    NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
    ```
-8. **Reinicia el dev server** (`Ctrl+C` → `pnpm dev`).
+8. [x] **Reinicia el dev server** (`Ctrl+C` → `pnpm dev`).
 
 ## 2. Autenticación — Proveedores OAuth (opcional pero recomendado)
 
@@ -59,24 +46,24 @@ Para cada proveedor, Supabase te da el `Redirect URL` que tienes que pegar en la
 
 ## 3. Despliegue en Vercel (cuando quieras enseñarlo)
 
-1. Crea cuenta gratis en https://vercel.com (puedes usar GitHub).
-2. **Subir el repo a GitHub**:
-   - Crea un repo nuevo (privado o público) llamado `weedconnect`.
-   - En la raíz del proyecto:
-     ```
-     git init
-     git add .
-     git commit -m "feat: Fase 1 + 2 — setup, schema y scaffolding"
-     git branch -M main
-     git remote add origin https://github.com/<tu-user>/weedconnect.git
-     git push -u origin main
-     ```
-3. En Vercel: `New Project → Import` tu repo de GitHub.
-4. Vercel detecta Next.js automáticamente. Pulsa Deploy.
-5. **Añadir variables de entorno**: tras el primer deploy, ve a `Settings → Environment Variables` y añade:
+> ⚠ **GitHub Pages no es compatible** con este proyecto. GitHub Pages solo sirve archivos
+> estáticos y WeedConnect usa Server Components, API routes, Server Actions y middleware
+> que requieren runtime Node.js. La plataforma correcta es **Vercel** (gratuita para proyectos
+> personales, diseñada para Next.js, un clic de deploy).
+
+El repositorio ya está en GitHub (`WeedConnect/WeedConnect`, rama `main`). Solo falta:
+
+1. Crea cuenta gratis en https://vercel.com con tu cuenta de GitHub.
+2. En Vercel: `Add New → Project → Import Git Repository`.
+3. Selecciona el repo `WeedConnect/WeedConnect`.
+4. Vercel detecta Next.js automáticamente. Pulsa **Deploy** (el primer deploy irá sin Supabase — es normal).
+5. **Añadir variables de entorno**: ve a `Settings → Environment Variables` y añade:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` (cuando tengas el dominio definitivo)
 6. Redeploy desde la pestaña Deployments.
+
+Cada `git push` a `main` lanzará un deploy automático en Vercel.
 
 ## 4. Dominio propio (opcional, ~10€/año)
 

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { MOCK_CATEGORIES, FORUM_MOCK_THREADS } from "@/data/forum-mock";
 
 export type ForumCategory = {
   id: string;
@@ -47,7 +48,8 @@ export async function getCategories(): Promise<ForumCategory[]> {
     .from("forum_categories")
     .select("id, slug, name, description, position")
     .order("position");
-  return (data as ForumCategory[]) ?? [];
+  const categories = (data as ForumCategory[]) ?? [];
+  return categories.length > 0 ? categories : (MOCK_CATEGORIES as ForumCategory[]);
 }
 
 export async function getThreads(categorySlug?: string): Promise<ForumThread[]> {
@@ -89,10 +91,11 @@ export async function getThreads(categorySlug?: string): Promise<ForumThread[]> 
     counts[pid] = (counts[pid] ?? 0) + 1;
   }
 
-  return (threads as unknown as ForumThread[]).map((t) => ({
+  const result = (threads as unknown as ForumThread[]).map((t) => ({
     ...t,
     reply_count: counts[t.id] ?? 0,
   }));
+  return result.length > 0 ? result : (FORUM_MOCK_THREADS as ForumThread[]);
 }
 
 export async function getThread(slug: string): Promise<ForumThread | null> {
@@ -104,7 +107,8 @@ export async function getThread(slug: string): Promise<ForumThread | null> {
     )
     .eq("slug", slug)
     .single();
-  return (data as unknown as ForumThread) ?? null;
+  if (data) return data as unknown as ForumThread;
+  return (FORUM_MOCK_THREADS.find((t) => t.slug === slug) as ForumThread | undefined) ?? null;
 }
 
 export async function getThreadPosts(threadId: string): Promise<ForumPost[]> {

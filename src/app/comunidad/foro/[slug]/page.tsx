@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -8,6 +7,7 @@ import { getThread, getThreadPosts, relativeTime } from "@/lib/forum";
 import { createClient } from "@/lib/supabase/server";
 import { ReplyForm } from "@/components/forum/reply-form";
 import { VoteButton } from "@/components/forum/vote-button";
+import { LocalThreadView } from "@/components/forum/local-thread-view";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +34,7 @@ export default async function ThreadPage({
     supabase.auth.getUser(),
   ]);
 
-  if (!thread) notFound();
+  if (!thread) return <LocalThreadView slug={slug} />;
 
   const posts = await getThreadPosts(thread.id);
 
