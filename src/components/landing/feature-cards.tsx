@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageSquare, MapPin, Sprout, ArrowRight } from "lucide-react";
+import { MessageSquare, MapPin, ArrowRight, Film, Pizza, Gamepad2, Newspaper, ShoppingBag, BookOpen } from "lucide-react";
 import { LogoWeedConnect } from "@/components/icons/logo-weedconnect";
 import {
   Card,
@@ -18,7 +18,7 @@ type Feature = {
 
 const FEATURES: Feature[] = [
   {
-    href: "/comunidad",
+    href: "/comunidad/foro",
     title: "Foro y comunidad",
     description:
       "Comparte experiencias, resuelve dudas y conecta con otros aficionados en espacios temáticos.",
@@ -26,24 +26,59 @@ const FEATURES: Feature[] = [
   },
   {
     href: "/mapa",
-    title: "Mapa de clubes",
+    title: "Mapa de spots",
     description:
-      "Encuentra asociaciones y clubes cannábicos cerca de ti con información, horarios y reseñas.",
+      "Encuentra asociaciones, miradores chill, spots de comida y planes con amigos cerca de ti.",
     icon: MapPin,
   },
   {
-    href: "/herramientas",
-    title: "Seguimiento de cultivo",
+    href: "/info/peliculas",
+    title: "Películas & Series",
     description:
-      "Lleva el control de tus cultivos: riegos, fertilizantes, fases y fotos del progreso.",
-    icon: Sprout,
+      "Selección de pelis y series clasificadas por mood: fumadón, risas, psicodélicas, terror y más.",
+    icon: Film,
   },
   {
-    href: "/strains", // fix to point to /strains since strains is available in nav
+    href: "/info/munchies",
+    title: "Munchies y recetas",
+    description:
+      "Ranking de los mejores antojos, recetas express y opciones de delivery para no moverte del sofá.",
+    icon: Pizza,
+  },
+  {
+    href: "/info/juegos",
+    title: "Juegos para jugar",
+    description:
+      "Lista curada de videojuegos chill, juegos caóticos con amigos y propuestas de mesa.",
+    icon: Gamepad2,
+  },
+  {
+    href: "/info/noticias",
+    title: "Noticias",
+    description:
+      "Actualidad cannábica: cambios legales, ciencia, asociaciones, cultura y tendencias.",
+    icon: Newspaper,
+  },
+  {
+    href: "/tienda/comparador",
+    title: "Compras recomendadas",
+    description:
+      "Setup chill definitivo: grinders, vaporizadores, LEDs, altavoces y más con enlaces de afiliado.",
+    icon: ShoppingBag,
+  },
+  {
+    href: "/info/educacion",
+    title: "Tips & Educación",
+    description:
+      "Guías para principiantes, cannabinoides, terpenos, reducción de daños y convivencia responsable.",
+    icon: BookOpen,
+  },
+  {
+    href: "/strains",
     title: "Catálogo de strains",
     description:
       "Explora variedades indica, sativa e híbridos con perfiles de aroma, efectos y THC/CBD.",
-    icon: LogoWeedConnect, // Custom geometric logo for this!
+    icon: LogoWeedConnect,
   },
 ];
 
@@ -63,7 +98,7 @@ export function FeatureCards() {
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 relative z-10">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 relative z-10">
         {FEATURES.map((f) => {
           const Icon = f.icon;
           const isCustomLogo = Icon === LogoWeedConnect;

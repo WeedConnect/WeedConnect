@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ShoppingCart, Star, ShieldCheck, ArrowUpRight, Tag, Sparkles, Lightbulb, Zap, Box } from "lucide-react";
+import { ShoppingCart, Star, ShieldCheck, ArrowUpRight, Tag, Sparkles, Lightbulb, Zap, Box, Cookie } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -13,6 +13,7 @@ const CATEGORIES = [
   { id: "vaporizadores", label: "Vaporizadores", icon: Zap },
   { id: "setup", label: "Setup Chill & LED", icon: Lightbulb },
   { id: "juegos", label: "Juegos y Diversión", icon: Sparkles },
+  { id: "snacks", label: "Snacks & Bebidas", icon: Cookie },
 ];
 
 const PRODUCTS = [
@@ -92,6 +93,49 @@ const PRODUCTS = [
     amazonLink: "#",
     specs: ["Batería 12h", "IPX7 Waterproof", "Extra Bass"]
   },
+  // --- PARAFERNALIA EXTRA ---
+  {
+    category: "parafernalia",
+    name: "Pack Papel de Liar King Size + Filtros",
+    desc: "Papel ultrafino sin cloro con filtros de cartón incluidos. Pack de 50 libritos para un suministro completo.",
+    price: "12.50€",
+    rating: 4.7,
+    tag: "Parafernalia",
+    amazonLink: "#",
+    specs: ["King Size Slim", "50 libritos", "Sin cloro"]
+  },
+  {
+    category: "parafernalia",
+    name: "Mechero de Gas Recargable Windproof",
+    desc: "Mechero de llama azul resistente al viento. Ideal para exteriores: miradores, playas y parques. Recargable y duradero.",
+    price: "8.99€",
+    rating: 4.6,
+    tag: "Parafernalia",
+    amazonLink: "#",
+    specs: ["Windproof", "Recargable", "Gas ajustable"]
+  },
+  {
+    category: "parafernalia",
+    name: "Bandeja Magnética Antideslizante con Caja",
+    desc: "Sistema modular: bandeja de liar con fondo magnético, cajita con cierre y compartimentos para grinder y papel.",
+    price: "22.00€",
+    rating: 4.8,
+    bestSeller: true,
+    tag: "Parafernalia",
+    amazonLink: "#",
+    specs: ["Magnético", "Compartimentos", "Kit completo"]
+  },
+  // --- SETUP EXTRA ---
+  {
+    category: "setup",
+    name: "Ambientador Eléctrico de Bambú y Cítrico",
+    desc: "Difusor ultrasónico silencioso que combina esencias naturales de bambú y cítrico para neutralizar olores y crear ambiente.",
+    price: "18.99€",
+    rating: 4.5,
+    tag: "Setup",
+    amazonLink: "#",
+    specs: ["Ultrasónico", "Sin ruido", "Aceites incluidos"]
+  },
   // --- JUEGOS ---
   {
     category: "juegos",
@@ -113,6 +157,48 @@ const PRODUCTS = [
     tag: "Juegos",
     amazonLink: "#",
     specs: ["Para todos", "2-10 jugadores"]
+  },
+  {
+    category: "juegos",
+    name: "Exploding Kittens — Juego de Cartas",
+    desc: "Juego de cartas explosivo y absurdo para 2-5 jugadores. Estrategia y caos en un mazo que garantiza carcajadas.",
+    price: "19.99€",
+    rating: 4.7,
+    tag: "Juegos",
+    amazonLink: "#",
+    specs: ["2-5 jugadores", "15 min partida", "Mayores 7 años"]
+  },
+  // --- SNACKS ---
+  {
+    category: "snacks",
+    name: "Pack Snacks Variados (Doritos, Cheetos, Oreos)",
+    desc: "El pack definitivo para una sesión: mezcla equilibrada de salado, picante y dulce para el antojo perfecto.",
+    price: "14.99€",
+    rating: 4.8,
+    bestSeller: true,
+    tag: "Snacks",
+    amazonLink: "#",
+    specs: ["8 unidades", "Salado + dulce", "Formato fiesta"]
+  },
+  {
+    category: "snacks",
+    name: "Cereales Captain Crunch (importación)",
+    desc: "Los cereales más icónicos del cine americano. Crujientes, dulces y adictivos. El desayuno o merienda chill de culto.",
+    price: "8.50€",
+    rating: 4.6,
+    tag: "Snacks",
+    amazonLink: "#",
+    specs: ["397g", "Importación USA", "Crunch garantizado"]
+  },
+  {
+    category: "snacks",
+    name: "Bebidas Isotónicas Pack 12 uds",
+    desc: "Hidratación top para tu sesión. Pack variado de isotónicas con electrolitos para mantenerte hidratado y refrescado.",
+    price: "11.90€",
+    rating: 4.5,
+    tag: "Snacks",
+    amazonLink: "#",
+    specs: ["12 latas 330ml", "Electrolitos", "Sin alcohol"]
   }
 ];
 
