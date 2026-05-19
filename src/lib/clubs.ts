@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/server";
 import { MOCK_CLUBS } from "@/data/clubs";
 import type { Club } from "@/types";
 
@@ -93,7 +93,7 @@ export async function getClubs(): Promise<Club[]> {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("clubs")
       .select("*")

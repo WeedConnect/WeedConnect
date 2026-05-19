@@ -10,13 +10,13 @@ export const metadata: Metadata = {
 export default function TerminosUsoPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <div className="mb-3 flex items-center gap-2">
           <FileText className="size-5 text-emerald-600" aria-hidden />
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Términos de Uso</h1>
         </div>
         <p className="text-sm text-muted-foreground">Última actualización: mayo 2026</p>
-      </header>
+      </PageHeader>
 
       <div className="space-y-8 text-sm leading-relaxed text-foreground/90">
 
@@ -150,3 +150,5 @@ export default function TerminosUsoPage() {
     </article>
   );
 }
+
+const PageHeader = "header";

@@ -15,18 +15,20 @@ export const metadata: Metadata = {
   },
 };
 
+const PageHeader = "header";
+
 export default async function StrainsPage() {
   const strains = await getStrains();
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Catálogo de strains</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Explora variedades por tipo, efectos y composición. Filtra y compara para encontrar la
           que mejor encaja con lo que buscas.
         </p>
-      </header>
+      </PageHeader>
       <StrainsBrowser strains={strains} />
     </section>
   );

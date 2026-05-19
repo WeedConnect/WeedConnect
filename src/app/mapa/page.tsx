@@ -25,10 +25,12 @@ export const metadata: Metadata = {
 export default async function MapaPage() {
   const locations = await getMapLocations();
 
+const PageHeader = "header";
+
   return (
     <section className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6">
       {/* ── Header ── */}
-      <header className="flex flex-col gap-3">
+      <PageHeader className="flex flex-col gap-3">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-brand-green dark:text-emerald-400">
           <MapPin className="size-3.5" />
           Mapa WeedConnect
@@ -43,7 +45,7 @@ export default async function MapaPage() {
         <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
           Sin compraventa · Sin contactos · Solo información orientativa y recomendaciones.
         </p>
-      </header>
+      </PageHeader>
 
       {/* ── Legal banner ── */}
       <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3.5 dark:border-amber-800/40 dark:bg-amber-950/20">

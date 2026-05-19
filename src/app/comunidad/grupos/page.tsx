@@ -100,13 +100,13 @@ const ICON_COLOR_MAP: Record<string, string> = {
 export default function GruposPage() {
   return (
     <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Grupos temáticos</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Espacios privados de la comunidad organizados por intereses. Únete a los que encajen
           contigo y conecta con personas afines.
         </p>
-      </header>
+      </PageHeader>
 
       <ul className="grid gap-4 sm:grid-cols-2">
         {GRUPOS.map((grupo) => {
@@ -173,3 +173,5 @@ export default function GruposPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

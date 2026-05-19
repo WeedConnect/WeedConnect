@@ -36,7 +36,7 @@ export function UserLevel({ points, className }: UserLevelProps) {
             level.id === "plantula"   && "bg-lime-500",
             level.id === "cultivador" && "bg-teal-500",
             level.id === "maestro"    && "bg-amber-500",
-            level.id === "leyenda"    && "bg-purple-500",
+            level.id === "leyenda"    && "bg-rose-500",
           )}
           style={{ width: `${pct}%` }}
         />
@@ -49,7 +49,7 @@ export function UserLevel({ points, className }: UserLevelProps) {
             <span>{pointsToNext.toLocaleString("es-ES")} pts restantes</span>
           </>
         ) : (
-          <span className="text-purple-500 dark:text-purple-400 font-semibold w-full text-center">
+          <span className="text-rose-500 dark:text-rose-400 font-semibold w-full text-center">
             Nivel máximo alcanzado
           </span>
         )}

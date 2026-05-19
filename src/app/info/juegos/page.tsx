@@ -54,7 +54,7 @@ const JUEGOS = [
 export default function JuegosPage() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 animate-in fade-in duration-500">
-      <header className="mb-10">
+      <PageHeader className="mb-10">
         <div className="flex items-center gap-2 text-emerald-600 mb-1">
           <Gamepad2 className="size-5" />
           <span className="text-xs font-bold uppercase tracking-wider">Gamers & Chill</span>
@@ -64,7 +64,7 @@ export default function JuegosPage() {
           Hemos seleccionado los títulos más inmersivos, coloridos y divertidos tanto digitales como de mesa, perfectos
           para encajar con el mood de tu sesión.
         </p>
-      </header>
+      </PageHeader>
 
       <div className="flex flex-col gap-12">
         {JUEGOS.map((sec) => {
@@ -122,3 +122,5 @@ export default function JuegosPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

@@ -68,7 +68,7 @@ export default async function StrainPage({
         <ArrowLeft className="size-4" /> Volver al catálogo
       </Link>
 
-      <header className="mt-6 flex flex-wrap items-start justify-between gap-4">
+      <PageHeader className="mt-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-3 text-3xl font-bold tracking-tight sm:text-4xl">
             <Leaf className="size-7 text-emerald-600" aria-hidden />
@@ -79,7 +79,7 @@ export default async function StrainPage({
         <Badge className={cn("border-0 text-sm", TYPE_COLOR[strain.type])}>
           {TYPE_LABEL[strain.type]}
         </Badge>
-      </header>
+      </PageHeader>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <Card>
@@ -144,3 +144,5 @@ export default async function StrainPage({
     </section>
   );
 }
+
+const PageHeader = "header";

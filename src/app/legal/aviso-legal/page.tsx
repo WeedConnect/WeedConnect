@@ -10,13 +10,13 @@ export const metadata: Metadata = {
 export default function AvisoLegalPage() {
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <div className="mb-3 flex items-center gap-2">
           <Scale className="size-5 text-emerald-600" aria-hidden />
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Aviso Legal</h1>
         </div>
         <p className="text-sm text-muted-foreground">Última actualización: mayo 2026</p>
-      </header>
+      </PageHeader>
 
       <div className="prose prose-sm dark:prose-invert max-w-none space-y-8 text-sm leading-relaxed text-foreground/90">
 
@@ -96,3 +96,5 @@ export default function AvisoLegalPage() {
     </article>
   );
 }
+
+const PageHeader = "header";

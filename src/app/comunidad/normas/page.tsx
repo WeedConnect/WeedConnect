@@ -57,7 +57,7 @@ const VALORES = [
 export default function NormasPage() {
   return (
     <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 animate-in fade-in duration-500">
-      <header className="mb-10">
+      <PageHeader className="mb-10">
         <div className="flex items-center gap-2 text-emerald-600 mb-2">
           <ShieldCheck className="size-6" />
           <span className="text-xs font-bold uppercase tracking-wider">Comunidad</span>
@@ -68,7 +68,7 @@ export default function NormasPage() {
           <strong className="text-foreground">No permitimos compraventa, contactos para conseguir sustancias ni ningún tipo de intermediación.</strong>{" "}
           Estas normas son de obligado cumplimiento para todos los usuarios.
         </p>
-      </header>
+      </PageHeader>
 
       {/* Aviso principal */}
       <div className="mb-8 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/60 dark:border-amber-900/40 dark:bg-amber-950/20 px-4 py-4">
@@ -153,3 +153,5 @@ export default function NormasPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

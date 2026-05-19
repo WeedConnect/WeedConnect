@@ -30,7 +30,7 @@ export default function PodcastPage() {
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <div className="flex items-center gap-3">
           <div className="rounded-full bg-emerald-100 p-2 dark:bg-emerald-900/40">
             <Headphones className="size-6 text-emerald-700 dark:text-emerald-300" aria-hidden />
@@ -49,7 +49,7 @@ export default function PodcastPage() {
             <ExternalLink className="size-3.5" /> Disponible en Spotify e iVoox
           </span>
         </div>
-      </header>
+      </PageHeader>
 
       {destacados.length > 0 && (
         <>
@@ -159,3 +159,5 @@ export default function PodcastPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

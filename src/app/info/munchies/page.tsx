@@ -40,7 +40,7 @@ export default function MunchiesPage() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 animate-in fade-in duration-500">
-      <header className="mb-10">
+      <PageHeader className="mb-10">
         <div className="flex items-center gap-2 text-emerald-600 mb-1">
           <Pizza className="size-5" />
           <span className="text-xs font-bold uppercase tracking-wider">Gastro & Placer</span>
@@ -50,7 +50,7 @@ export default function MunchiesPage() {
           El antojo ataca, nosotros respondemos. Aquí encontrarás el ranking oficial de gules comunitarios y recetas 
           súper sencillas que puedes hacer tú mismo en 10 minutos. Sin complicaciones.
         </p>
-      </header>
+      </PageHeader>
 
       {/* --- SECCIÓN 1: RANKING DE MUNCHIES --- */}
       <div className="mb-12">
@@ -200,3 +200,5 @@ export default function MunchiesPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

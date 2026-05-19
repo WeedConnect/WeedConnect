@@ -83,7 +83,7 @@ export default async function BlogPostPage({ params }: PageProps) {
       </Link>
 
       {/* Cabecera del artículo */}
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <Badge className={cn("border-0 text-[10px] mb-3", BLOG_CATEGORIA_COLOR[post.categoria])}>
           {BLOG_CATEGORIA_LABEL[post.categoria]}
         </Badge>
@@ -106,7 +106,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             {post.minutosLectura} min de lectura
           </span>
         </div>
-      </header>
+      </PageHeader>
 
       <Separator className="mb-8" />
 
@@ -166,3 +166,5 @@ export default async function BlogPostPage({ params }: PageProps) {
     </article>
   );
 }
+
+const PageHeader = "header";

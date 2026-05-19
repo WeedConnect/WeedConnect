@@ -248,7 +248,7 @@ export default async function ForoPage({
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       {/* ── Header ── */}
-      <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <PageHeader className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-2">
             <MessageSquare className="size-3.5" />
@@ -268,7 +268,7 @@ export default async function ForoPage({
           <PenSquare className="size-4" />
           Nuevo hilo
         </Link>
-      </header>
+      </PageHeader>
 
       {/* ── Layout principal (feed + sidebar) ── */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
@@ -303,3 +303,5 @@ export default async function ForoPage({
     </section>
   );
 }
+
+const PageHeader = "header";

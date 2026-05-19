@@ -28,7 +28,7 @@ const COLOR_MAP = {
 export default function LegalPage() {
   return (
     <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <header className="mb-6">
+      <PageHeader className="mb-6">
         <div className="mb-3 flex items-center gap-2">
           <Scale className="size-6 text-emerald-600" aria-hidden />
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Marco legal</h1>
@@ -37,7 +37,7 @@ export default function LegalPage() {
           Guía orientativa sobre la normativa del cannabis en España y Europa. Esta información no
           constituye asesoramiento jurídico — consulta siempre con un profesional legal.
         </p>
-      </header>
+      </PageHeader>
 
       <div className="mb-8 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-4 text-sm dark:border-amber-800 dark:bg-amber-950/30">
         <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" aria-hidden />
@@ -182,3 +182,5 @@ export default function LegalPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

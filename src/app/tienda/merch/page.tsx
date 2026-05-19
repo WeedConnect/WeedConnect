@@ -20,7 +20,7 @@ const MOCK_PRODUCTOS = [
 export default function MerchPage() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <header className="mb-8 flex items-start gap-4">
+      <PageHeader className="mb-8 flex items-start gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Merchandising</h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
@@ -28,7 +28,7 @@ export default function MerchPage() {
             el proyecto esté en producción.
           </p>
         </div>
-      </header>
+      </PageHeader>
 
       <div className="mb-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-4 text-sm dark:border-blue-900 dark:bg-blue-950/30">
         <Info className="mt-0.5 size-4 shrink-0 text-blue-600" aria-hidden />
@@ -79,3 +79,5 @@ export default function MerchPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

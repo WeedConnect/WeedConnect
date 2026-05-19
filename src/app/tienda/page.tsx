@@ -26,12 +26,12 @@ const SECTIONS = [
 export default function TiendaPage() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Tienda</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Merchandising oficial y comparador de productos.
         </p>
-      </header>
+      </PageHeader>
       <ul className="grid gap-4 sm:grid-cols-2">
         {SECTIONS.map((s) => {
           const Icon = s.icon;
@@ -55,3 +55,5 @@ export default function TiendaPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

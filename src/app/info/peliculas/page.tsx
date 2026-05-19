@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function PeliculasPage() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 animate-in fade-in duration-500">
-      <header className="mb-8 flex flex-col gap-2">
+      <PageHeader className="mb-8 flex flex-col gap-2">
         <div className="flex items-center gap-2 text-emerald-600">
           <Film className="size-6" />
           <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Cine & Chill</span>
@@ -20,7 +20,7 @@ export default function PeliculasPage() {
           Selecciones elegidas meticulosamente por la comunidad y clasificadas según tu viaje actual.
           Desde risas absurdas hasta documentales reveladores y viajes interdimensionales.
         </p>
-      </header>
+      </PageHeader>
 
       {/* Componente Cliente de Filtrado Dinámico */}
       <PeliculasBrowser />
@@ -31,3 +31,5 @@ export default function PeliculasPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

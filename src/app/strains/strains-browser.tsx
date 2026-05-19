@@ -14,6 +14,15 @@ import {
 } from "@/components/ui/card";
 import type { Strain, StrainType } from "@/types";
 import { cn } from "@/lib/utils";
+import { TerpeneWheel, TERPENES } from "./terpene-wheel";
+
+function getDominantTerpenes(strain: Strain) {
+  return TERPENES.filter((t) => {
+    const hasFlavor = strain.flavors.some((f) => t.flavorsMapped.includes(f.toLowerCase()));
+    const hasEffect = strain.effects.some((e) => t.effectsMapped.includes(e.toLowerCase()));
+    return hasFlavor || hasEffect;
+  });
+}
 
 const TYPE_LABEL: Record<StrainType, string> = {
   indica: "Indica",
@@ -32,11 +41,23 @@ const TYPES: (StrainType | "all")[] = ["all", "indica", "sativa", "hybrid"];
 export function StrainsBrowser({ strains }: { strains: Strain[] }) {
   const [query, setQuery] = useState("");
   const [type, setType] = useState<StrainType | "all">("all");
+  const [selectedTerpeneId, setSelectedTerpeneId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return strains.filter((s) => {
       if (type !== "all" && s.type !== type) return false;
+
+      // Filtro por Terpeno seleccionado en la rueda
+      if (selectedTerpeneId) {
+        const terpene = TERPENES.find((t) => t.id === selectedTerpeneId);
+        if (terpene) {
+          const matchesFlavor = s.flavors.some((f) => terpene.flavorsMapped.includes(f.toLowerCase()));
+          const matchesEffect = s.effects.some((e) => terpene.effectsMapped.includes(e.toLowerCase()));
+          if (!matchesFlavor && !matchesEffect) return false;
+        }
+      }
+
       if (!q) return true;
       return (
         s.name.toLowerCase().includes(q) ||
@@ -44,10 +65,12 @@ export function StrainsBrowser({ strains }: { strains: Strain[] }) {
         s.effects.some((e) => e.includes(q))
       );
     });
-  }, [strains, query, type]);
+  }, [strains, query, type, selectedTerpeneId]);
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Rueda de Terpenos e Interactividad */}
+      <TerpeneWheel selectedTerpeneId={selectedTerpeneId} onSelectTerpene={setSelectedTerpeneId} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-sm flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -120,6 +143,32 @@ export function StrainsBrowser({ strains }: { strains: Strain[] }) {
                         </span>
                       ))}
                     </div>
+                    {/* Terpenos dominantes calculados */}
+                    {(() => {
+                      const dominant = getDominantTerpenes(s);
+                      if (dominant.length === 0) return null;
+                      return (
+                        <div className="mt-3.5 pt-2.5 border-t border-border/50 flex flex-wrap gap-1 items-center">
+                          <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground mr-1">
+                            Terpenos:
+                          </span>
+                          {dominant.map((dt) => (
+                            <span
+                              key={dt.id}
+                              className={cn(
+                                "rounded px-1.5 py-0.5 text-[9px] font-extrabold flex items-center gap-0.5",
+                                dt.bgBadgeClass,
+                                dt.textBadgeClass
+                              )}
+                              title={`${dt.name}: ${dt.aroma}`}
+                            >
+                              <span>{dt.emoji}</span>
+                              <span>{dt.name}</span>
+                            </span>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </Link>

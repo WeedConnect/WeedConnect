@@ -465,7 +465,7 @@ export function GrowTracker() {
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <header className="mb-8 flex items-end justify-between gap-4">
+      <PageHeader className="mb-8 flex items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl flex flex-wrap items-center gap-2">
             Seguimiento de cultivo
@@ -500,7 +500,7 @@ export function GrowTracker() {
           <Plus className="size-4" />
           Nuevo cultivo
         </Button>
-      </header>
+      </PageHeader>
 
       {/* Banner de migración / éxito de migración */}
       {user && migrationSuccess && (
@@ -1149,3 +1149,5 @@ export function GrowTracker() {
     </section>
   );
 }
+
+const PageHeader = "header";

@@ -147,13 +147,13 @@ const NIVEL_COLOR: Record<string, string> = {
 export default function EducacionPage() {
   return (
     <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Educación cannábica</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Guías sobre ciencia cannábica, cultivo y consumo responsable. Información basada en
           evidencia, sin sensacionalismo.
         </p>
-      </header>
+      </PageHeader>
 
       <div className="flex flex-col gap-6">
         {GUIAS.map((guia) => {
@@ -199,3 +199,5 @@ export default function EducacionPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

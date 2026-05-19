@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/server";
 import { MOCK_STRAINS } from "@/data/strains";
 import type { Strain } from "@/types";
 
@@ -34,7 +34,7 @@ export async function getStrains(): Promise<Strain[]> {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("strains")
       .select("*")
@@ -66,7 +66,7 @@ export async function getStrainBySlug(slug: string): Promise<Strain | null> {
   }
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("strains")
       .select("*")

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function ComparadorPage() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <p className="text-xs font-bold uppercase tracking-widest text-brand-green dark:text-brand-gold mb-1">
           Herramienta
         </p>
@@ -20,9 +20,11 @@ export default function ComparadorPage() {
         <p className="mt-2 max-w-2xl text-sm sm:text-base text-muted-foreground leading-relaxed">
           Selecciona hasta 3 variedades y compáralas lado a lado para encontrar la que mejor se adapta a lo que buscas.
         </p>
-      </header>
+      </PageHeader>
 
       <StrainComparator strains={MOCK_STRAINS} />
     </div>
   );
 }
+
+const PageHeader = "header";

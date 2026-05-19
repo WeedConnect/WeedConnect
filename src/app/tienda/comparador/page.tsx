@@ -205,7 +205,7 @@ const PRODUCTS = [
 export default function ComparadorPage() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 animate-in fade-in duration-500">
-      <header className="mb-10">
+      <PageHeader className="mb-10">
         <div className="flex items-center gap-2 text-emerald-600 mb-1">
           <ShoppingCart className="size-5" />
           <span className="text-xs font-bold uppercase tracking-wider">Gear & Gadgets</span>
@@ -215,7 +215,7 @@ export default function ComparadorPage() {
           ¿Quieres montar el setup chill definitivo? Hemos analizado y filtrado los mejores productos de Amazon por su
           relación calidad/precio para tu salón, dormitorio o salidas al aire libre.
         </p>
-      </header>
+      </PageHeader>
 
       <div className="mb-8 flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50/30 dark:border-emerald-950/30 dark:bg-emerald-950/10 px-4 py-4 text-sm leading-relaxed">
         <ShieldCheck className="mt-0.5 size-5 shrink-0 text-emerald-600" />
@@ -318,3 +318,5 @@ export default function ComparadorPage() {
     </section>
   );
 }
+
+const PageHeader = "header";

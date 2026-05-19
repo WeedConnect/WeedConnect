@@ -93,7 +93,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
       </Link>
 
       {/* Cabecera */}
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <Badge className={cn("border-0 text-[10px] mb-3", CATEGORIA_EVENTO_COLOR[ev.categoria])}>
           {CATEGORIA_EVENTO_LABEL[ev.categoria]}
         </Badge>
@@ -101,7 +101,7 @@ export default async function EventoDetailPage({ params }: PageProps) {
           {ev.titulo}
         </h1>
         <p className="mt-3 text-lg text-muted-foreground leading-relaxed">{ev.descripcion}</p>
-      </header>
+      </PageHeader>
 
       {/* Info rápida */}
       <div className="rounded-xl border border-border bg-muted/20 px-5 py-4 mb-8 flex flex-col gap-3 text-sm">
@@ -265,3 +265,5 @@ export default async function EventoDetailPage({ params }: PageProps) {
     </article>
   );
 }
+
+const PageHeader = "header";

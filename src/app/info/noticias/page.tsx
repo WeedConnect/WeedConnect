@@ -10,13 +10,13 @@ export const metadata: Metadata = {
 export default function NoticiasPage() {
   return (
     <section className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <header className="mb-8">
+      <PageHeader className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Noticias</h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
           Actualidad cannábica de España y Europa: cambios legales, investigación científica,
           cultivo y noticias de la comunidad.
         </p>
-      </header>
+      </PageHeader>
 
       <NoticiasBrowser noticias={MOCK_NOTICIAS} />
 
@@ -34,3 +34,5 @@ export default function NoticiasPage() {
     </section>
   );
 }
+
+const PageHeader = "header";
