@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.openstreetmap.org; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.openstreetmap.org https://*.supabase.co https://*.supabase.in;",
+              "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.openstreetmap.org https://plausible.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.openstreetmap.org https://*.supabase.co https://*.supabase.in; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.openstreetmap.org https://plausible.io;",
           },
         ],
       },
