@@ -4,20 +4,16 @@ import { notFound } from "next/navigation";
 import {
   CalendarDays,
   Award,
-  MessageSquare,
   Edit,
   Leaf,
   Sprout,
-  Clock
 } from "lucide-react";
 import { ProfileTabs } from "./profile-tabs";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { relativeTime } from "@/lib/forum";
 import { cn } from "@/lib/utils";
 
 interface PageProps {

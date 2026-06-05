@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { 
   Search, X, Star, MapPin, ChevronDown, SlidersHorizontal, 
-  AlertCircle, Compass, Check, ShieldAlert, Zap, Filter
+  AlertCircle, Compass, Filter
 } from "lucide-react";
 import type { MapLocation, MapCategory, LocationContinent } from "@/types";
 import { cn } from "@/lib/utils";
@@ -17,8 +17,7 @@ import {
   SheetContent, 
   SheetHeader, 
   SheetTitle, 
-  SheetDescription,
-  SheetClose
+  SheetDescription
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 
@@ -565,7 +564,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
 
   // Manejar el envío de reportes de actividad en vivo
   const handleReportStatus = (locId: string, status: string) => {
-    // eslint-disable-next-line react-hooks/purity
+    // eslint-disable-next-line react-hooks/purity -- Date.now() se usa en un event handler, no durante el render
     const now = Date.now();
     const newReport = {
       status,
@@ -595,11 +594,10 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
     });
   }, [allLocations, userCoords]);
 
-  // Lógica de determinación de Live Status para render
-  const getLiveStatusInfo = (locId: string) => {
+  // Lógica de determinación de Live Status — useCallback para ref estable en useMemo
+  const getLiveStatusInfo = useCallback((locId: string) => {
     const report = liveReports[locId];
     // Expirar reportes locales viejos de más de 2 horas
-    // eslint-disable-next-line react-hooks/purity
     if (report && Date.now() - report.timestamp < 2 * 60 * 60 * 1000) {
       const cfg = LIVE_STATUS_CONFIG[report.status as keyof typeof LIVE_STATUS_CONFIG];
       return cfg ? { status: report.status, ...cfg } : null;
@@ -614,7 +612,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
     const status = statuses[hash % statuses.length];
     const cfg = LIVE_STATUS_CONFIG[status as keyof typeof LIVE_STATUS_CONFIG];
     return cfg ? { status, ...cfg } : null;
-  };
+  }, [liveReports]);
 
   // Solicitar Geolocalización
   const handleRequestLocation = () => {
@@ -726,7 +724,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
   }, [
     locationsWithDistance, activeCategory, activeContinent, activeCountry, minRating, 
     search, sortBy, showDemoOnly, showVerified, filterAccess, filterVerified, 
-    selectedAmenities, filterLiveStatus, userCoords, liveReports
+    selectedAmenities, filterLiveStatus, userCoords, getLiveStatusInfo
   ]);
 
   const mapMarkers  = filtered.slice(0, MAP_MARKER_LIMIT);
