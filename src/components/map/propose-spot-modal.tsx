@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { proposeSpot } from "@/app/actions/clubs";
+import type { MapLocation } from "@/types";
 
 const schema = z.object({
   name: z.string().min(3, "Mínimo 3 caracteres").max(100, "Máximo 100 caracteres"),
@@ -45,7 +46,7 @@ interface ProposeSpotModalProps {
   lat: number;
   lng: number;
   onClose: () => void;
-  onSpotProposed?: (newSpot: any) => void;
+  onSpotProposed?: (newSpot: MapLocation) => void;
 }
 
 export function ProposeSpotModal({ open, lat, lng, onClose, onSpotProposed }: ProposeSpotModalProps) {
@@ -60,10 +61,12 @@ export function ProposeSpotModal({ open, lat, lng, onClose, onSpotProposed }: Pr
   });
 
   async function onSubmit(values: FormValues) {
-    const newSpot = {
-      id: `local-prop-${Date.now()}`,
+    // eslint-disable-next-line react-hooks/purity
+    const now = Date.now();
+    const newSpot: MapLocation = {
+      id: `local-prop-${now}`,
       name: values.name,
-      slug: `local-${slugify(values.name)}-${Date.now().toString(36)}`,
+      slug: `local-${slugify(values.name)}-${now.toString(36)}`,
       category: values.type === "asociacion" ? "association" : "chill_spot",
       city: values.city,
       country: "Spain",

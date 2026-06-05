@@ -2,20 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MessageSquare, Clock, Edit, Award, Sparkles, Trophy } from "lucide-react";
+import { MessageSquare, Clock, Edit, Award, Sparkles } from "lucide-react";
 import { UserLevel } from "@/components/gamification/user-level";
 import { Achievements } from "@/components/gamification/achievements";
 import { DailyQuests } from "@/components/gamification/daily-quests";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { relativeTime } from "@/lib/forum-utils";
 import { cn } from "@/lib/utils";
+
+interface ForumThread {
+  id: string;
+  title: string;
+  slug: string;
+  created_at: string;
+  forum_categories: { name?: string } | null;
+}
 
 interface ProfileTabsProps {
   initialPoints: number;
   hasAvatar: boolean;
-  threads: any[];
+  threads: ForumThread[];
 }
 
 export function ProfileTabs({ initialPoints, hasAvatar, threads }: ProfileTabsProps) {

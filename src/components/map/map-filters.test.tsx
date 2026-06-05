@@ -7,12 +7,12 @@ import type { MapLocation } from "@/types";
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
 vi.mock("react-leaflet", () => ({
-  MapContainer: ({ children }: any) => <div data-testid="map-container">{children}</div>,
+  MapContainer: ({ children }: { children: React.ReactNode }) => <div data-testid="map-container">{children}</div>,
   TileLayer: () => <div data-testid="tile-layer" />,
-  Marker: ({ children, position }: any) => (
+  Marker: ({ children, position }: { children: React.ReactNode; position: [number, number] }) => (
     <div data-testid="marker" data-position={JSON.stringify(position)}>{children}</div>
   ),
-  Popup: ({ children }: any) => <div data-testid="popup">{children}</div>,
+  Popup: ({ children }: { children: React.ReactNode }) => <div data-testid="popup">{children}</div>,
   useMapEvents: () => null,
   useMap: () => ({
     setView: vi.fn(),
@@ -35,13 +35,13 @@ vi.mock("sonner", () => ({
 }));
 
 vi.mock("@/components/ui/sheet", () => ({
-  Sheet: ({ children }: any) => <div data-testid="sheet-root">{children}</div>,
-  SheetTrigger: ({ children }: any) => <div data-testid="sheet-trigger">{children}</div>,
-  SheetContent: ({ children }: any) => <div data-testid="sheet-content">{children}</div>,
-  SheetHeader: ({ children }: any) => <div data-testid="sheet-header">{children}</div>,
-  SheetTitle: ({ children }: any) => <div data-testid="sheet-title">{children}</div>,
-  SheetDescription: ({ children }: any) => <div data-testid="sheet-description">{children}</div>,
-  SheetClose: ({ children }: any) => <div data-testid="sheet-close">{children}</div>,
+  Sheet: ({ children }: { children: React.ReactNode }) => <div data-testid="sheet-root">{children}</div>,
+  SheetTrigger: ({ children }: { children: React.ReactNode }) => <div data-testid="sheet-trigger">{children}</div>,
+  SheetContent: ({ children }: { children: React.ReactNode }) => <div data-testid="sheet-content">{children}</div>,
+  SheetHeader: ({ children }: { children: React.ReactNode }) => <div data-testid="sheet-header">{children}</div>,
+  SheetTitle: ({ children }: { children: React.ReactNode }) => <div data-testid="sheet-title">{children}</div>,
+  SheetDescription: ({ children }: { children: React.ReactNode }) => <div data-testid="sheet-description">{children}</div>,
+  SheetClose: ({ children }: { children: React.ReactNode }) => <div data-testid="sheet-close">{children}</div>,
 }));
 
 vi.mock("@/components/map/propose-spot-modal", () => ({

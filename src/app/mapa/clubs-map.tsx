@@ -507,7 +507,31 @@ const CONTINENT_BUTTONS: { value: ContinentFilter; label: string }[] = [
 ];
 
 export function ClubsMap({ locations }: { locations: MapLocation[] }) {
-  const [allLocations,    setAllLocations]    = useState<MapLocation[]>(locations);
+  // Estado de spots propuestos localmente (para re-render reactivo)
+  const [localProposed, setLocalProposed] = useState<MapLocation[]>(() => {
+    if (typeof window === "undefined") return [];
+    const saved = localStorage.getItem("weedconnect_local_proposed_spots");
+    return saved ? (JSON.parse(saved) as MapLocation[]) : [];
+  });
+
+  // Fusionar spots externos con locales propuestos (useMemo, sin setState en efecto)
+  const allLocations = useMemo(() => {
+    const combined = [...localProposed, ...locations];
+    return combined.filter(
+      (loc, index, self) => self.findIndex((l) => l.id === loc.id) === index
+    );
+  }, [localProposed, locations]);
+
+  // Cargar live reports (sin setState sincrónico: se usa lazy initializer)
+  const [liveReports, setLiveReports] = useState<Record<string, { status: string; timestamp: number }>>(() => {
+    if (typeof window === "undefined") return {};
+    const savedReports = localStorage.getItem("weedconnect_live_reports");
+    if (savedReports) {
+      try { return JSON.parse(savedReports); } catch (e) { console.error("Error cargando live reports:", e); }
+    }
+    return {};
+  });
+
   const [search,          setSearch]          = useState("");
   const [activeCategory,  setActiveCategory]  = useState<MapCategory | "all">("all");
   const [activeContinent, setActiveContinent] = useState<ContinentFilter>("all");
@@ -521,9 +545,6 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
   const [userCoords,      setUserCoords]      = useState<{ lat: number; lng: number } | null>(null);
   const [locatingUser,    setLocatingUser]    = useState(false);
 
-  // Live status
-  const [liveReports,     setLiveReports]     = useState<Record<string, { status: string; timestamp: number }>>({});
-
   // Filtros Avanzados
   const [filterAccess,    setFilterAccess]    = useState<"all" | "free" | "membership">("all");
   const [filterVerified,  setFilterVerified]  = useState<"all" | "official" | "community">("all");
@@ -534,28 +555,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
   const [pendingCoords, setPendingCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Cargar spots locales y live reports
-  useEffect(() => {
-    // 1. Cargar spots locales propuestos
-    const savedSpots = localStorage.getItem("weedconnect_local_proposed_spots");
-    const localSpots: MapLocation[] = savedSpots ? JSON.parse(savedSpots) : [];
-    
-    const combined = [...localSpots, ...locations];
-    const unique = combined.filter(
-      (loc, index, self) => self.findIndex((l) => l.id === loc.id) === index
-    );
-    setAllLocations(unique);
 
-    // 2. Cargar reportes en vivo
-    const savedReports = localStorage.getItem("weedconnect_live_reports");
-    if (savedReports) {
-      try {
-        setLiveReports(JSON.parse(savedReports));
-      } catch (e) {
-        console.error("Error cargando live reports:", e);
-      }
-    }
-  }, [locations]);
 
   // Cargar países únicos de la lista combinada
   const countries = useMemo(() => {
@@ -565,9 +565,11 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
 
   // Manejar el envío de reportes de actividad en vivo
   const handleReportStatus = (locId: string, status: string) => {
+    // eslint-disable-next-line react-hooks/purity
+    const now = Date.now();
     const newReport = {
       status,
-      timestamp: Date.now()
+      timestamp: now
     };
     const updated = {
       ...liveReports,
@@ -597,6 +599,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
   const getLiveStatusInfo = (locId: string) => {
     const report = liveReports[locId];
     // Expirar reportes locales viejos de más de 2 horas
+    // eslint-disable-next-line react-hooks/purity
     if (report && Date.now() - report.timestamp < 2 * 60 * 60 * 1000) {
       const cfg = LIVE_STATUS_CONFIG[report.status as keyof typeof LIVE_STATUS_CONFIG];
       return cfg ? { status: report.status, ...cfg } : null;
@@ -731,7 +734,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
   const mapCenter: [number, number] = userCoords ? [userCoords.lat, userCoords.lng] : [41.3851, 2.1734]; // Centrado por defecto en Barcelona si no hay coords
 
   const handleSpotProposed = (newSpot: MapLocation) => {
-    setAllLocations((prev) => {
+    setLocalProposed((prev) => {
       const combined = [newSpot, ...prev];
       return combined.filter(
         (loc, index, self) => self.findIndex((l) => l.id === loc.id) === index
@@ -838,7 +841,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
                           type="radio"
                           name="filterAccess"
                           checked={filterAccess === opt.value}
-                          onChange={() => setFilterAccess(opt.value as any)}
+                          onChange={() => setFilterAccess(opt.value as "all" | "free" | "membership")}
                           className="accent-emerald-600 size-4 cursor-pointer"
                         />
                         {opt.label}
@@ -909,7 +912,7 @@ export function ClubsMap({ locations }: { locations: MapLocation[] }) {
                           type="radio"
                           name="filterVerified"
                           checked={filterVerified === opt.value}
-                          onChange={() => setFilterVerified(opt.value as any)}
+                          onChange={() => setFilterVerified(opt.value as "all" | "official" | "community")}
                           className="accent-emerald-600 size-4 cursor-pointer"
                         />
                         {opt.label}

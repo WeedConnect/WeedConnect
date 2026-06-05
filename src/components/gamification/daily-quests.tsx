@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Check, Flame, Award, ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { Check, Flame, Award, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface Quest {
@@ -66,23 +66,21 @@ interface ToastNotification {
 }
 
 export function DailyQuests({ onPointsEarned, className }: DailyQuestsProps) {
-  const [quests, setQuests] = useState<Quest[]>([]);
-  const [toasts, setToasts] = useState<ToastNotification[]>([]);
-  const [toastIdCounter, setToastIdCounter] = useState(0);
-
-  // Cargar estado de las misiones desde localStorage
-  useEffect(() => {
+  const [quests, setQuests] = useState<Quest[]>(() => {
+    // Inicialización lazy: se ejecuta solo una vez, no dentro de un efecto
+    if (typeof window === "undefined") return INITIAL_QUESTS;
     const saved = localStorage.getItem("weedconnect_daily_quests");
     if (saved) {
       try {
-        setQuests(JSON.parse(saved));
+        return JSON.parse(saved) as Quest[];
       } catch {
-        setQuests(INITIAL_QUESTS);
+        return INITIAL_QUESTS;
       }
-    } else {
-      setQuests(INITIAL_QUESTS);
     }
-  }, []);
+    return INITIAL_QUESTS;
+  });
+  const [toasts, setToasts] = useState<ToastNotification[]>([]);
+  const [toastIdCounter, setToastIdCounter] = useState(0);
 
   const saveQuests = (updatedQuests: Quest[]) => {
     setQuests(updatedQuests);
