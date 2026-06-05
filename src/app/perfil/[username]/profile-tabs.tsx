@@ -16,7 +16,7 @@ interface ForumThread {
   title: string;
   slug: string;
   created_at: string;
-  forum_categories: { name?: string } | null;
+  forum_categories: { name?: string } | { name?: string }[] | null;
 }
 
 interface ProfileTabsProps {
@@ -136,7 +136,9 @@ export function ProfileTabs({ initialPoints, hasAvatar, threads }: ProfileTabsPr
                         </h4>
                         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                           <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 font-medium capitalize">
-                            {(t.forum_categories as { name?: string } | null)?.name || "General"}
+                            {(Array.isArray(t.forum_categories)
+                              ? t.forum_categories[0]?.name
+                              : t.forum_categories?.name) || "General"}
                           </Badge>
                           <span>•</span>
                           <span>Publicado {relativeTime(t.created_at)}</span>
